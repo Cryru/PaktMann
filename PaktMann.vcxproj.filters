@@ -13,10 +13,33 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Map">
+      <UniqueIdentifier>{2fff5e77-9e28-4966-bbbc-3d53db413eac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Map">
+      <UniqueIdentifier>{d83b1c3f-b070-426f-a8d4-f285c1337c86}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Boot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MapTile.cpp">
+      <Filter>Source Files\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="GameMap.cpp">
+      <Filter>Source Files\Map</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GameMap.h">
+      <Filter>Header Files\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="MapTile.h">
+      <Filter>Header Files\Map</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="map.txt" />
   </ItemGroup>
 </Project>
