@@ -40,5 +40,4 @@ int GameMap::GetHeight()
 GameMap::~GameMap()
 {
 	map.clear();
-	delete &map;
 }

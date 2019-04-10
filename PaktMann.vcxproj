@@ -148,11 +148,13 @@
     <ClCompile Include="Boot.cpp" />
     <ClCompile Include="GameMap.cpp" />
     <ClCompile Include="MapTile.cpp" />
+    <ClCompile Include="Spritesheet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameMap.h" />
     <ClInclude Include="MapTile.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Spritesheet.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\entitySheet.png" />

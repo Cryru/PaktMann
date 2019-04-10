@@ -7,6 +7,7 @@
 #include "SDL_image.h"
 
 #include "GameMap.h"
+#include "Spritesheet.h"
 
 // Thanks SDL
 #undef main
@@ -16,9 +17,10 @@ char firstMap[] = "Assets/map.txt";
 int tileSize = 16;
 
 // Assets
-SDL_Texture* spriteSheet;
-SDL_Rect solidTile;
-SDL_Rect walkableTile;
+Spritesheet* mapTiles;
+Spritesheet* entitySheet;
+SDL_Texture* winText;
+SDL_Texture* loseText;
 
 // Creates a GameMap object from the specified file.
 // The file is expected to be arbitrary preformatted(tm).
@@ -72,7 +74,7 @@ GameMap* loadMap(const char* mapName) {
 }
 
 // Renders the GameMap object.
-void RenderMap(SDL_Renderer * renderer, GameMap * map, SDL_Texture * tileMap) {
+void RenderMap(SDL_Renderer * renderer, GameMap * map, Spritesheet * tileMap) {
 	for (size_t x = 0; x < map->GetWidth(); x++)
 	{
 		for (size_t y = 0; y < map->GetHeight(); y++)
@@ -86,30 +88,13 @@ void RenderMap(SDL_Renderer * renderer, GameMap * map, SDL_Texture * tileMap) {
 			tileRect.h = tileSize;
 
 			if (curTile->Solid) {
-				SDL_RenderCopy(renderer, tileMap, &solidTile, &tileRect);
+				SDL_RenderCopy(renderer, tileMap->GetTexture(), mapTiles->GetFrame(0), &tileRect);
 			}
 			else {
-				SDL_RenderCopy(renderer, tileMap, &walkableTile, &tileRect);
+				SDL_RenderCopy(renderer, tileMap->GetTexture(), mapTiles->GetFrame(1), &tileRect);
 			}
 		}
 	}
-}
-
-// Loads a texture from a bmp file.
-SDL_Texture* LoadTexture(SDL_Renderer * renderer, const char* fileName)
-{
-	SDL_Surface* bmpSurface = IMG_Load(fileName);
-
-	if (bmpSurface == NULL)
-	{
-		std::cerr << "Couldn't load texture " << fileName << " !\n";
-		return 0;
-	}
-
-	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, bmpSurface);
-	SDL_FreeSurface(bmpSurface);
-
-	return texture;
 }
 
 int main(int argc, char* args[]) {
@@ -136,12 +121,10 @@ int main(int argc, char* args[]) {
 	}
 
 	printf("Loading assets...\n");
-	spriteSheet = LoadTexture(renderer, "Assets/mapTiles.png");
-	solidTile.w = 16;
-	solidTile.h = 16;
-	walkableTile.x = 16;
-	walkableTile.w = 16;
-	walkableTile.h = 16;
+	mapTiles = new Spritesheet(renderer, "Assets/mapTiles.png", 16);
+	entitySheet = new Spritesheet(renderer, "Assets/entitySheet.png", 16);
+	winText = Spritesheet::LoadTexture(renderer, "Assets/win.png");
+	loseText = Spritesheet::LoadTexture(renderer, "Assets/lose.png");
 
 	printf("Loading map...\n");
 	GameMap* map = loadMap(&firstMap[0]);
@@ -170,13 +153,20 @@ int main(int argc, char* args[]) {
 		// Update logic.
 
 		// Render.
-		RenderMap(renderer, map, spriteSheet);
+		RenderMap(renderer, map, mapTiles);
 
 		// Swap buffers.
 		SDL_RenderPresent(renderer);
 	}
 
 	// Cleanup.
+	delete mapTiles;
+	delete entitySheet;
+	SDL_DestroyTexture(winText);
+	SDL_DestroyTexture(loseText);
+
+	delete map;
+
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(win);
 	SDL_Quit();
