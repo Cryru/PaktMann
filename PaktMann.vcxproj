@@ -70,8 +70,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>V:\Dev\PaktMann\PaktMann\Libraries\SDL\include;$(IncludePath)</IncludePath>
-    <LibraryPath>V:\Dev\PaktMann\PaktMann\Libraries\SDL\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>V:\Dev\PaktMann\PaktMann\Libraries\SDL_Image\include;V:\Dev\PaktMann\PaktMann\Libraries\SDL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>V:\Dev\PaktMann\PaktMann\Libraries\SDL_Image\lib\x86;V:\Dev\PaktMann\PaktMann\Libraries\SDL\lib\x86;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)\bin\$(Configuration)\</OutDir>
     <IntDir>obj\$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -91,7 +91,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>
       </EntryPointSymbol>
     </Link>
@@ -152,12 +152,16 @@
   <ItemGroup>
     <ClInclude Include="GameMap.h" />
     <ClInclude Include="MapTile.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="map.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <DeploymentContent>true</DeploymentContent>
-    </None>
+    <Image Include="Assets\entitySheet.png" />
+    <Image Include="Assets\lose.png" />
+    <Image Include="Assets\mapTiles.png" />
+    <Image Include="Assets\win.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Assets\map.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

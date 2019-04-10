@@ -38,8 +38,27 @@
     <ClInclude Include="MapTile.h">
       <Filter>Header Files\Map</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="map.txt" />
+    <Image Include="Assets\entitySheet.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Assets\lose.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Assets\win.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Assets\mapTiles.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Assets\map.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
