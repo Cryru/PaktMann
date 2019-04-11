@@ -12,11 +12,19 @@ void Pacman::Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* spriteSheet
 	loc.w = tileSize;
 	loc.h = tileSize;
 
-	SDL_RenderCopy(renderer, spriteSheet->GetTexture(), spriteSheet->GetFrame(0), &loc);
+	SDL_RenderCopy(renderer, spriteSheet->GetTexture(), spriteSheet->GetFrame(animFrame), &loc);
 }
 
 void Pacman::Update(float dt)
 {
+	timer += dt;
+	if(timer >= animSpeed)
+	{
+		timer -= animSpeed;
+
+		if(animFrame == 0) animFrame = 1;
+		else if(animFrame == 1) animFrame = 0;
+	}
 }
 
 void Pacman::CollidedWith(Entity* entity)
