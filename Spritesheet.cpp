@@ -1,6 +1,20 @@
 #include "Spritesheet.h"
-#include <iostream>
 #include <SDL_image.h>
+
+SDL_Texture* Spritesheet::LoadTexture(SDL_Renderer* renderer, const char* fileName) {
+	SDL_Surface* bmpSurface = IMG_Load(fileName);
+
+	if (bmpSurface == NULL)
+	{
+		std::cerr << "Couldn't load texture " << fileName << " !\n";
+		return 0;
+	}
+
+	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, bmpSurface);
+	SDL_FreeSurface(bmpSurface);
+
+	return texture;
+}
 
 Spritesheet::Spritesheet(SDL_Renderer* renderer, const char* texturePath, int tileSize)
 {

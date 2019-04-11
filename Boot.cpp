@@ -22,81 +22,6 @@ Spritesheet* entitySheet;
 SDL_Texture* winText;
 SDL_Texture* loseText;
 
-// Creates a GameMap object from the specified file.
-// The file is expected to be arbitrary preformatted(tm).
-GameMap* loadMap(const char* mapName) {
-	// Read the file.
-	std::vector<std::string> total;
-	std::string line;
-	std::ifstream mapFile(mapName);
-	if (mapFile.is_open())
-	{
-		while (std::getline(mapFile, line))
-		{
-			total.push_back(line);
-		}
-		mapFile.close();
-	}
-	else {
-		std::cerr << "Map file " << mapName << " not found!\n";
-		return NULL;
-	}
-
-	// Verify map format
-	int mapHeight = total.size();
-	int mapWidth = mapHeight > 0 ? total[0].length() : 0;
-
-	if (mapWidth == 0 || mapHeight == 0) {
-		std::cerr << "Map file " << mapName << " is not properly formatted!\n";
-		return NULL;
-	}
-
-	// Construct the map.
-	GameMap* map = new GameMap(mapWidth, mapHeight);
-
-	for (size_t y = 0; y < mapHeight; y++)
-	{
-		int lineWidth = total[y].length();
-
-		// Verify map line width compared to map width.
-		if (lineWidth != mapWidth) {
-			std::cerr << "Map file " << mapName << " is not properly formatted on line" << y << "!\n";
-			return NULL;
-		}
-
-		for (size_t x = 0; x < lineWidth; x++)
-		{
-			map->SetTile(x, y, new MapTile(total[y][x] == '1'));
-		}
-	}
-
-	return map;
-}
-
-// Renders the GameMap object.
-void RenderMap(SDL_Renderer * renderer, GameMap * map, Spritesheet * tileMap) {
-	for (size_t x = 0; x < map->GetWidth(); x++)
-	{
-		for (size_t y = 0; y < map->GetHeight(); y++)
-		{
-			MapTile* curTile = map->GetTile(x, y);
-
-			SDL_Rect tileRect;
-			tileRect.x = x * tileSize;
-			tileRect.y = y * tileSize;
-			tileRect.w = tileSize;
-			tileRect.h = tileSize;
-
-			if (curTile->Solid) {
-				SDL_RenderCopy(renderer, tileMap->GetTexture(), mapTiles->GetFrame(0), &tileRect);
-			}
-			else {
-				SDL_RenderCopy(renderer, tileMap->GetTexture(), mapTiles->GetFrame(1), &tileRect);
-			}
-		}
-	}
-}
-
 int main(int argc, char* args[]) {
 	printf("Starting SDL...\n");
 	SDL_Init(SDL_INIT_EVERYTHING);
@@ -127,7 +52,7 @@ int main(int argc, char* args[]) {
 	loseText = Spritesheet::LoadTexture(renderer, "Assets/lose.png");
 
 	printf("Loading map...\n");
-	GameMap* map = loadMap(&firstMap[0]);
+	GameMap* map = GameMap::LoadMap(&firstMap[0]);
 
 	// Set render size based on the map.
 	int sizeX = tileSize * map->GetWidth();
@@ -150,10 +75,9 @@ int main(int argc, char* args[]) {
 
 		// Update input.
 
-		// Update logic.
-
-		// Render.
-		RenderMap(renderer, map, mapTiles);
+		// Update logic and render map.
+		map->UpdateEntities(16);
+		map->Draw(renderer, tileSize, mapTiles, entitySheet);
 
 		// Swap buffers.
 		SDL_RenderPresent(renderer);
@@ -166,6 +90,7 @@ int main(int argc, char* args[]) {
 	SDL_DestroyTexture(loseText);
 
 	delete map;
+	map = NULL;
 
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(win);

@@ -1,5 +1,5 @@
 #include "MapTile.h"
-
+#include <cstdio>
 
 
 MapTile::MapTile(bool solid)
@@ -10,4 +10,5 @@ MapTile::MapTile(bool solid)
 
 MapTile::~MapTile()
 {
+
 }

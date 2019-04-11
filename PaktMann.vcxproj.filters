@@ -19,6 +19,12 @@
     <Filter Include="Header Files\Map">
       <UniqueIdentifier>{d83b1c3f-b070-426f-a8d4-f285c1337c86}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Entities">
+      <UniqueIdentifier>{afaf66e0-f71d-4501-a180-67e4afe4e6b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Entities">
+      <UniqueIdentifier>{74c2ca40-b7ae-4c3d-9bae-a0de700e208b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Boot.cpp">
@@ -33,6 +39,21 @@
     <ClCompile Include="Spritesheet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Pacman.cpp">
+      <Filter>Source Files\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Entity.cpp">
+      <Filter>Source Files\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Ghost.cpp">
+      <Filter>Source Files\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="ScoreFruit.cpp">
+      <Filter>Source Files\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="PowerFruit.cpp">
+      <Filter>Source Files\Entities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameMap.h">
@@ -41,11 +62,23 @@
     <ClInclude Include="MapTile.h">
       <Filter>Header Files\Map</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Spritesheet.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Pacman.h">
+      <Filter>Header Files\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Ghost.h">
+      <Filter>Header Files\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Entity.h">
+      <Filter>Header Files\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="ScoreFruit.h">
+      <Filter>Header Files\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="PowerFruit.h">
+      <Filter>Header Files\Entities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

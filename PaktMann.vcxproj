@@ -146,14 +146,23 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Boot.cpp" />
+    <ClCompile Include="Entity.cpp" />
     <ClCompile Include="GameMap.cpp" />
+    <ClCompile Include="Ghost.cpp" />
     <ClCompile Include="MapTile.cpp" />
+    <ClCompile Include="Pacman.cpp" />
+    <ClCompile Include="PowerFruit.cpp" />
+    <ClCompile Include="ScoreFruit.cpp" />
     <ClCompile Include="Spritesheet.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Entity.h" />
     <ClInclude Include="GameMap.h" />
+    <ClInclude Include="Ghost.h" />
     <ClInclude Include="MapTile.h" />
-    <ClInclude Include="resource.h" />
+    <ClInclude Include="Pacman.h" />
+    <ClInclude Include="PowerFruit.h" />
+    <ClInclude Include="ScoreFruit.h" />
     <ClInclude Include="Spritesheet.h" />
   </ItemGroup>
   <ItemGroup>
