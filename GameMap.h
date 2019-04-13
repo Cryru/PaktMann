@@ -1,11 +1,9 @@
-#include <stdio.h>
+#pragma once
 #include <vector>
 
 #include "MapTile.h"
 #include "Entity.h"
-#include "Pacman.h"
 
-#pragma once
 class GameMap
 {
 private:
@@ -21,6 +19,6 @@ public:
 	int GetHeight();
 	~GameMap();
 	static GameMap* LoadMap(const char* mapName);
-	void UpdateEntities(float dt);
+	void UpdateEntities(float dt, const Uint8* keys);
 	void Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* mapSpritesheet, Spritesheet* entitySpritesheet);
 };

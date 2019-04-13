@@ -1,6 +1,7 @@
 #include "Ghost.h"
+#include "GameMap.h"
 
-Ghost::Ghost(int x, int y) : Entity(x, y)
+Ghost::Ghost(GameMap* map, int x, int y, int z) : Entity(map, x, y, z)
 {
 }
 
@@ -8,11 +9,7 @@ Ghost::~Ghost()
 {
 }
 
-void Ghost::Update(float dt)
-{
-}
-
-void Ghost::CollidedWith(Entity* entity)
+void Ghost::Update(float dt, const Uint8* keys)
 {
 }
 

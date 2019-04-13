@@ -62,9 +62,7 @@ int main(int argc, char* args[]) {
 	printf("Starting game loop...\n");
 	SDL_Event ev;
 	bool isRunning = true;
-	Uint64 now = SDL_GetPerformanceCounter();
 	Uint64 before = SDL_GetPerformanceCounter();
-	float deltaTime = 0;
 	while (isRunning) {
 
 		// Process SDL events.
@@ -77,15 +75,17 @@ int main(int argc, char* args[]) {
 			}
 		}
 
+		const Uint8* keys = SDL_GetKeyboardState(NULL);
+
 		// Calculate delta time.
-		now = SDL_GetPerformanceCounter();
-		deltaTime = (float)((now - before) * 1000 / (float)SDL_GetPerformanceFrequency());
+		Uint64 now = SDL_GetPerformanceCounter();
+		const float deltaTime = (float)((now - before) * 1000 / (float)SDL_GetPerformanceFrequency());
 		before = now; // words of wisdom.
 
 		// Update input.
 
 		// Update logic and render map.
-		map->UpdateEntities(deltaTime);
+		map->UpdateEntities(deltaTime, keys);
 		map->Draw(renderer, tileSize, mapTiles, entitySheet);
 
 		// Swap buffers.

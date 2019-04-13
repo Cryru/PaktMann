@@ -1,14 +1,14 @@
 #pragma once
 #include "Entity.h"
+#include "GameMap.h"
 
 class Ghost :
 	public Entity
 {
 public:
-	Ghost(int x, int y);
-	~Ghost();
-	void Update(float dt) override;
-	void CollidedWith(Entity* entity) override;
+	Ghost(GameMap* map, int x, int y, int z);
+	~Ghost() override;
+	void Update(float dt, const Uint8* keys) override;
 	void Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* spriteSheet) override;
 };
 

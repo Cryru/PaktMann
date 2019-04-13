@@ -1,19 +1,18 @@
 #include "ScoreFruit.h"
+#include "GameMap.h"
 
-ScoreFruit::ScoreFruit(int x, int y) : Entity(x, y)
+ScoreFruit::ScoreFruit(GameMap* map, int x, int y, int z) : Entity(map, x, y, z)
 {
 }
 
-void ScoreFruit::Update(float dt)
-{
-}
-
-void ScoreFruit::CollidedWith(Entity* entity)
+void ScoreFruit::Update(float dt, const Uint8* keys)
 {
 }
 
 void ScoreFruit::Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* spriteSheet)
 {
+	if(Dead) return;
+
 	SDL_Rect loc;
 	loc.x = this->x * tileSize;
 	loc.y = this->y * tileSize;

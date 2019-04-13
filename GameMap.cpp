@@ -11,29 +11,35 @@
 #include "Ghost.h"
 #include "ScoreFruit.h"
 #include "PowerFruit.h"
+#include <algorithm>
 
 // Entity factory.
-Pacman* createPacman(int x, int y)
+Pacman* createPacman(GameMap* map, int x, int y)
 {
-	return new Pacman(x, y);
+	Uint8 keyW = SDL_GetScancodeFromName("W");
+	Uint8 keyS = SDL_GetScancodeFromName("S");
+	Uint8 keyA = SDL_GetScancodeFromName("A");
+	Uint8 keyD = SDL_GetScancodeFromName("D");
+
+	return new Pacman(map, x, y, 3, keyW, keyS, keyA, keyD);
 }
 
-Ghost* createGhost(int x, int y)
+Ghost* createGhost(GameMap* map, int x, int y)
 {
-	return new Ghost(x, y);
+	return new Ghost(map, x, y, 2);
 }
 
-ScoreFruit* createScoreFruit(int x, int y)
+ScoreFruit* createScoreFruit(GameMap* map, int x, int y)
 {
-	return new ScoreFruit(x, y);
+	return new ScoreFruit(map, x, y, 1);
 }
 
-PowerFruit* createPowerFruit(int x, int y)
+PowerFruit* createPowerFruit(GameMap* map, int x, int y)
 {
-	return new PowerFruit(x, y);
+	return new PowerFruit(map, x, y, 1);
 }
 
-typedef Entity* (*entityCreator)(int, int);
+typedef Entity* (*entityCreator)(GameMap* map, int, int);
 
 std::map<char, entityCreator> entityMap = {
 	{ 'p', (entityCreator)createPacman },
@@ -96,11 +102,13 @@ GameMap* GameMap::LoadMap(const char* mapName) {
 			// Check if creating an entity.
 			if (entityMap[tileChar] != NULL)
 			{
-				Entity* newEntity = entityMap[tileChar](x, y);
+				Entity* newEntity = entityMap[tileChar](map, x, y);
 				map->entities.push_back(newEntity);
 			}
 		}
 	}
+
+	std::sort(map->entities.begin(), map->entities.end(), [](Entity* x, Entity* y) { return x->z < y->z; });
 
 	return map;
 }
@@ -114,6 +122,7 @@ GameMap::GameMap(int width, int height)
 {
 	this->width = width;
 	this->height = height;
+	this->entities = std::vector<Entity*>();
 
 	// Fill map with null tiles.
 	for (size_t x = 0; x < width; x++)
@@ -179,12 +188,15 @@ GameMap::~GameMap()
  * Update all entities in the map.
  * @param dt The time passed since the last update.
  */
-void GameMap::UpdateEntities(float dt)
+void GameMap::UpdateEntities(float dt, const Uint8* keys)
 {
 	for (size_t i = 0; i < entities.size(); i++)
 	{
-		entities[i]->Update(dt);
+		entities[i]->Update(dt, keys);
 	}
+
+	// Remove dead entities.
+	entities.erase(std::remove_if(entities.begin(), entities.end(), [](Entity* e) { return e->Dead; }), entities.end());
 }
 
 /**

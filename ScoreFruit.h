@@ -1,13 +1,13 @@
 #pragma once
 #include "Entity.h"
+#include "GameMap.h"
 
 class ScoreFruit : public Entity
 {
 public:
-	ScoreFruit(int x, int y);
-	~ScoreFruit();
-	void Update(float dt) override;
-	void CollidedWith(Entity* entity) override;
+	ScoreFruit(GameMap* map, int x, int y, int z);
+	~ScoreFruit() override;
+	void Update(float dt, const Uint8* keys) override;
 	void Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* spriteSheet) override;
 };
 
