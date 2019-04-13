@@ -4,6 +4,13 @@
 #include "MapTile.h"
 #include "Entity.h"
 
+enum GameState
+{
+	Running,
+	Won,
+	Lost
+};
+
 class GameMap
 {
 private:
@@ -11,6 +18,7 @@ private:
 	int height;
 	std::vector<std::vector<MapTile>> map;
 	std::vector<Entity*> entities;
+	GameState state = Running;
 public:
 	GameMap(int width, int height);
 	MapTile* GetTile(int x, int y);
@@ -19,6 +27,6 @@ public:
 	int GetHeight();
 	~GameMap();
 	static GameMap* LoadMap(const char* mapName);
-	void UpdateEntities(float dt, const Uint8* keys);
-	void Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* mapSpritesheet, Spritesheet* entitySpritesheet);
+	void Update(float dt, const Uint8* keys);
+	void Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* mapSpritesheet, Spritesheet* entitySpritesheet, SDL_Texture* winImage, SDL_Texture* loseImage);
 };

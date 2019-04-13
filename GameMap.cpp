@@ -108,7 +108,7 @@ GameMap* GameMap::LoadMap(const char* mapName) {
 		}
 	}
 
-	std::sort(map->entities.begin(), map->entities.end(), [](Entity* x, Entity* y) { return x->z < y->z; });
+	std::sort(map->entities.begin(), map->entities.end(), [](Entity * x, Entity * y) { return x->z < y->z; });
 
 	return map;
 }
@@ -188,15 +188,67 @@ GameMap::~GameMap()
  * Update all entities in the map.
  * @param dt The time passed since the last update.
  */
-void GameMap::UpdateEntities(float dt, const Uint8* keys)
+void GameMap::Update(float dt, const Uint8* keys)
 {
+	// Check if running.
+	if (state != Running) return;
+
 	for (size_t i = 0; i < entities.size(); i++)
 	{
-		entities[i]->Update(dt, keys);
+		Entity* current = entities[i];
+
+		current->Update(dt, keys);
+		if (dynamic_cast<Pacman*>(current))
+		{
+			for (size_t e = 0; e < entities.size(); e++)
+			{
+				Entity* subCurrent = entities[e];
+
+				if (current->x == subCurrent->x && current->y == subCurrent->y && (dynamic_cast<ScoreFruit*>(subCurrent) || dynamic_cast<PowerFruit*>(subCurrent)))
+				{
+					subCurrent->Dead = true;
+					break;
+				}
+			}
+		}
 	}
 
 	// Remove dead entities.
-	entities.erase(std::remove_if(entities.begin(), entities.end(), [](Entity* e) { return e->Dead; }), entities.end());
+	entities.erase(std::remove_if(entities.begin(), entities.end(), [](Entity * e) { return e->Dead; }), entities.end());
+
+	// Check for win condition - no fruits left.
+	bool fruitsLeft = false;
+	for (size_t e = 0; e < entities.size(); e++)
+	{
+		Entity* subCurrent = entities[e];
+
+		if (dynamic_cast<ScoreFruit*>(subCurrent) || dynamic_cast<PowerFruit*>(subCurrent))
+		{
+			fruitsLeft = true;
+			break;
+		}
+	}
+	if (!fruitsLeft)
+	{
+		state = Won;
+	}
+
+	// Check for lose condition - no Pacman left.
+	bool pacmanLeft = false;
+	for (size_t e = 0; e < entities.size(); e++)
+	{
+		Entity* subCurrent = entities[e];
+
+		if (dynamic_cast<Pacman*>(subCurrent))
+		{
+			pacmanLeft = true;
+			break;
+		}
+	}
+	if (!pacmanLeft)
+	{
+		state = Lost;
+	}
 }
 
 /**
@@ -206,7 +258,7 @@ void GameMap::UpdateEntities(float dt, const Uint8* keys)
  * @param mapSpritesheet The spritesheet to use to draw the tiles.
  * @param entitySpritesheet The spritesheet to use to draw the entities.
  */
-void GameMap::Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* mapSpritesheet, Spritesheet* entitySpritesheet)
+void GameMap::Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* mapSpritesheet, Spritesheet* entitySpritesheet, SDL_Texture* winImage, SDL_Texture* loseImage)
 {
 	for (size_t x = 0; x < width; x++)
 	{
@@ -232,5 +284,20 @@ void GameMap::Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* mapSprites
 	for (size_t i = 0; i < entities.size(); i++)
 	{
 		entities[i]->Draw(renderer, tileSize, entitySpritesheet);
+	}
+
+	// Check if drawing lose or win.
+	if (state != Running)
+	{
+		SDL_Rect endImageRect;
+		
+		if (state == Won)
+		{
+			SDL_RenderCopy(renderer, winImage, NULL, NULL);
+		}
+		else if (state == Lost)
+		{
+			SDL_RenderCopy(renderer, loseImage, NULL, NULL);
+		}
 	}
 }

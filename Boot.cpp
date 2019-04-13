@@ -85,8 +85,8 @@ int main(int argc, char* args[]) {
 		// Update input.
 
 		// Update logic and render map.
-		map->UpdateEntities(deltaTime, keys);
-		map->Draw(renderer, tileSize, mapTiles, entitySheet);
+		map->Update(deltaTime, keys);
+		map->Draw(renderer, tileSize, mapTiles, entitySheet, winText, loseText);
 
 		// Swap buffers.
 		SDL_RenderPresent(renderer);

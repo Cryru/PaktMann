@@ -24,7 +24,7 @@ void Pacman::Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* spriteSheet
 		NULL, facingLeft ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL);
 }
 
-void Pacman::Update(float dt, const Uint8 * keys)
+void Pacman::Update(const float dt, const Uint8 * keys)
 {
 	int velocityY = 0;
 	int velocityX = 0;
@@ -74,7 +74,6 @@ void Pacman::Update(float dt, const Uint8 * keys)
 		}
 		else if (velocityY != 0 && !map->GetTile(x, y + velocityY)->Solid)
 		{
-			// Check for collision.
 			y += velocityY;
 		}
 
@@ -91,6 +90,7 @@ void Pacman::Update(float dt, const Uint8 * keys)
 		moveTimer = dt;
 	}
 
+	// Animate sprite.
 	timer += dt;
 	if (timer >= animSpeed)
 	{
