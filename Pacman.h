@@ -1,14 +1,6 @@
 #pragma once
 #include "Entity.h"
-
-enum Direction
-{
-	None,
-	Left,
-	Right,
-	Up,
-	Down
-};
+#include "Direction.h"
 
 class Pacman :
 	public Entity
@@ -17,11 +9,7 @@ private:
 	// Animation Logic
 	int animFrame = 0;
 	float timer = 0;
-	const float animSpeed = 400;
-	float drawX;
-	float drawY;
-	int moveStartX;
-	int moveStartY;
+	const float animSpeed = 300;
 
 	// Inputs
 	Uint8 keyUp;
@@ -33,6 +21,10 @@ private:
 	float moveTimer = 0;
 	const float moveSpeed = 125;
 	Direction direction = None;
+	int moveStartX;
+	int moveStartY;
+	float drawX;
+	float drawY;
 
 	bool Move(int velocityX, int velocityY, float dt);
 public:

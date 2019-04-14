@@ -26,6 +26,7 @@ public:
 	GameMap(int width, int height);
 	MapTile* GetTile(int x, int y);
 	void SetTile(int x, int y, MapTile tileData);
+	Entity* GetPlayer() const;
 	int GetWidth();
 	int GetHeight();
 	~GameMap();

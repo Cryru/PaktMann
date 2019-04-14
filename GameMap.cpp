@@ -24,26 +24,38 @@ Pacman* createPacman(GameMap* map, int x, int y)
 	return new Pacman(map, x, y, 3, keyW, keyS, keyA, keyD);
 }
 
-Ghost* createGhost(GameMap* map, int x, int y)
+Ghost* createGhostF(GameMap* map, int x, int y)
 {
-	return new Ghost(map, x, y, 2);
+	return new Ghost(map, x, y, 4, 2, 5);
 }
 
-ScoreFruit* createScoreFruit(GameMap* map, int x, int y)
+Ghost* createGhostG(GameMap* map, int x, int y)
+{
+	return new Ghost(map, x, y, 4, 6, 0);
+}
+
+Ghost* createGhostH(GameMap* map, int x, int y)
+{
+	return new Ghost(map, x, y, 4, 7, -5);
+}
+
+ScoreFruit* createScoreFruit(GameMap * map, int x, int y)
 {
 	return new ScoreFruit(map, x, y, 1);
 }
 
-PowerFruit* createPowerFruit(GameMap* map, int x, int y)
+PowerFruit* createPowerFruit(GameMap * map, int x, int y)
 {
 	return new PowerFruit(map, x, y, 1);
 }
 
-typedef Entity* (*entityCreator)(GameMap* map, int, int);
+typedef Entity* (*entityCreator)(GameMap * map, int, int);
 
 std::map<char, entityCreator> entityMap = {
 	{ 'p', (entityCreator)createPacman },
-	{ 'g', (entityCreator)createGhost },
+	{ 'f', (entityCreator)createGhostF },
+	{ 'g', (entityCreator)createGhostG },
+	{ 'h', (entityCreator)createGhostH },
 	{ '0', (entityCreator)createScoreFruit },
 	{ 's', (entityCreator)createPowerFruit }
 };
@@ -97,7 +109,7 @@ GameMap* GameMap::LoadMap(const char* mapName) {
 		for (size_t x = 0; x < lineWidth; x++)
 		{
 			char tileChar = total[y][x];
-			map->SetTile(x, y, MapTile(tileChar == '1'));
+			map->SetTile(x, y, MapTile(x, y, tileChar == '1'));
 
 			// Check if creating an entity.
 			if (entityMap[tileChar] != NULL)
@@ -143,10 +155,11 @@ GameMap::GameMap(int width, int height)
 	// Fill map with null tiles.
 	for (size_t x = 0; x < width; x++)
 	{
-		map.push_back(*new std::vector<MapTile>());
+		map.emplace_back();
 		for (size_t y = 0; y < height; y++)
 		{
-			map[x].push_back(NULL);
+			//map[x].push_back(NULL);
+			map[x].emplace_back();
 		}
 	}
 }
@@ -159,6 +172,12 @@ GameMap::GameMap(int width, int height)
  */
 MapTile* GameMap::GetTile(int x, int y)
 {
+	if(x > map.size() || y > map[0].size())
+	{
+		std::cout << "Tried to access tile " << x << ":" << y << " which doesn't exist!";
+		return &map[0][0];
+	}
+
 	return &map[x][y];
 }
 
@@ -170,6 +189,14 @@ MapTile* GameMap::GetTile(int x, int y)
  */
 void GameMap::SetTile(int x, int y, MapTile tileData) {
 	map[x][y] = (tileData);
+}
+
+/**
+ * @returns The player entity.
+ */
+Entity* GameMap::GetPlayer() const
+{
+	return playerEntity;
 }
 
 /**
@@ -196,7 +223,12 @@ GameMap::~GameMap()
 	scoreEntities.clear();
 	enemyEntities.clear();
 
+	for (size_t i = 0; i < map.size(); i++)
+	{
+		map[i].clear();
+	}
 	map.clear();
+
 	for (size_t i = 0; i < entities.size(); i++)
 	{
 		delete entities[i];
@@ -208,7 +240,7 @@ GameMap::~GameMap()
  * Update all entities in the map.
  * @param dt The time passed since the last update.
  */
-void GameMap::Update(float dt, const Uint8* keys)
+void GameMap::Update(float dt, const Uint8 * keys)
 {
 	// Check if running.
 	if (state != Running) return;
