@@ -231,15 +231,21 @@ void GameMap::Update(float dt, const Uint8* keys)
 	}
 
 	// Check if win condition - no score entities, is met.
-	if (scoreEntities.size() == 0)
+	if (scoreEntities.empty())
 	{
 		state = Won;
 	}
 
-	// Check for lose condition - player is dead.
-	if (playerEntity->Dead)
+	// Check for lose condition - player is on the same square as an enemy.
+	for (size_t i = 0; i < enemyEntities.size(); i++)
 	{
-		state = Lost;
+		Entity* enemyEntity = enemyEntities[i];
+		if (enemyEntity->x == playerEntity->x && enemyEntity->y == playerEntity->y)
+		{
+			playerEntity->Dead = true;
+			state = Lost;
+			break;
+		}
 	}
 
 	// Remove dead entities.

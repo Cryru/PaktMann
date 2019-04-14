@@ -1,6 +1,14 @@
 #pragma once
 #include "Entity.h"
-#include "GameMap.h"
+
+enum Direction
+{
+	None,
+	Left,
+	Right,
+	Up,
+	Down
+};
 
 class Pacman :
 	public Entity
@@ -10,8 +18,12 @@ private:
 	int animFrame = 0;
 	float timer = 0;
 	const float animSpeed = 400;
+	float drawX;
+	float drawY;
+	int moveStartX;
+	int moveStartY;
 
-	// Input
+	// Inputs
 	Uint8 keyUp;
 	Uint8 keyDown;
 	Uint8 keyLeft;
@@ -19,14 +31,10 @@ private:
 
 	// Movement Logic
 	float moveTimer = 0;
-	bool canMove = true;
-	const float moveSpeed = 150;
-	float drawX;
-	float drawY;
-	float moveStartX;
-	float moveStartY;
-	bool facingLeft = true;
+	const float moveSpeed = 125;
+	Direction direction = None;
 
+	bool Move(int velocityX, int velocityY, float dt);
 public:
 	Pacman(GameMap* map, int x, int y, int z, Uint8 keyUp, Uint8 keyDown, Uint8 keyLeft, Uint8 keyRight);
 	void Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* spriteSheet) override;

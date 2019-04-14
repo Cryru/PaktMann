@@ -22,31 +22,49 @@ void Pacman::Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* spriteSheet
 	loc.w = tileSize;
 	loc.h = tileSize;
 
-	SDL_RenderCopyEx(renderer, spriteSheet->GetTexture(), spriteSheet->GetFrame(animFrame), &loc, 0,
-		NULL, facingLeft ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL);
+	int angle = 0;
+	SDL_RendererFlip flip = SDL_FLIP_NONE;
+
+	switch (direction)
+	{
+	case Right:
+		flip = SDL_FLIP_HORIZONTAL;
+		break;
+	case Up:
+		angle = 90;
+		break;
+	case Down:
+		angle = -90;
+		flip = SDL_FLIP_VERTICAL;
+		break;
+	default:;
+	}
+
+	SDL_RenderCopyEx(renderer, spriteSheet->GetTexture(), spriteSheet->GetFrame(animFrame), &loc, angle,
+		NULL, flip);
 }
 
-void Pacman::Update(const float dt, const Uint8 * keys)
+void Pacman::Update(const float dt, const Uint8* keys)
 {
 	int velocityY = 0;
 	int velocityX = 0;
 
 	// Check inputs and set velocity.
-	if (keys[keyUp])
+	if (keys[keyUp] && !map->GetTile(x, y - 1)->Solid)
 	{
-		velocityY -= 1;
+		direction = Up;
 	}
-	if (keys[keyDown])
+	if (keys[keyDown] && !map->GetTile(x, y + 1)->Solid)
 	{
-		velocityY += 1;
+		direction = Down;
 	}
-	if (keys[keyLeft])
+	if (keys[keyLeft] && !map->GetTile(x - 1, y)->Solid)
 	{
-		velocityX -= 1;
+		direction = Left;
 	}
-	if (keys[keyRight])
+	if (keys[keyRight] && !map->GetTile(x + 1, y)->Solid)
 	{
-		velocityX += 1;
+		direction = Right;
 	}
 
 	// Check if moving.
@@ -54,8 +72,9 @@ void Pacman::Update(const float dt, const Uint8 * keys)
 	{
 		// Lerp movement so it looks more natural.
 		moveTimer += dt;
-		drawX = Lerp(moveStartX, x, moveTimer / moveSpeed);
-		drawY = Lerp(moveStartY, y, moveTimer / moveSpeed);
+		float p = moveTimer / moveSpeed;
+		drawX = Lerp(moveStartX, x, p);
+		drawY = Lerp(moveStartY, y, p);
 		if (moveTimer >= moveSpeed)
 		{
 			drawX = x;
@@ -64,32 +83,24 @@ void Pacman::Update(const float dt, const Uint8 * keys)
 		}
 	}
 	// Check if should move.
-	if (moveTimer == 0 && (velocityX != 0 || velocityY != 0))
+	if (moveTimer == 0)
 	{
-		moveStartX = x;
-		moveStartY = y;
-
-		// Add velocity to position, but prevent diagonal movement. Left-right is the dominant direction.
-		if (velocityX != 0 && !map->GetTile(x + velocityX, y)->Solid)
+		switch (direction)
 		{
-			x += velocityX;
+		case Left:
+			Move(-1, 0, dt);
+			break;
+		case Right:
+			Move(1, 0, dt);
+			break;
+		case Up:
+			Move(0, -1, dt);
+			break;
+		case Down:
+			Move(0, 1, dt);
+			break;
+		default:;
 		}
-		else if (velocityY != 0 && !map->GetTile(x, y + velocityY)->Solid)
-		{
-			y += velocityY;
-		}
-
-		// Set facing direction.
-		if (velocityX < 0)
-		{
-			facingLeft = true;
-		}
-		else if (velocityX > 0)
-		{
-			facingLeft = false;
-		}
-
-		moveTimer = dt;
 	}
 
 	// Animate sprite.
@@ -101,6 +112,21 @@ void Pacman::Update(const float dt, const Uint8 * keys)
 		if (animFrame == 0) animFrame = 1;
 		else if (animFrame == 1) animFrame = 0;
 	}
+}
+
+bool Pacman::Move(int velocityX, int velocityY, float dt)
+{
+	if (!map->GetTile(x + velocityX, y + velocityY)->Solid)
+	{
+		moveStartX = x;
+		moveStartY = y;
+		x += velocityX;
+		y += velocityY;
+		moveTimer = dt;
+		return true;
+	}
+
+	return false;
 }
 
 Pacman::~Pacman()
