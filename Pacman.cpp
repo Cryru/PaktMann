@@ -10,6 +10,8 @@ Pacman::Pacman(GameMap* map, int x, int y, int z, Uint8 keyUp, Uint8 keyDown, Ui
 
 	this->drawX = x;
 	this->drawY = y;
+
+	this->type = Player;
 }
 
 void Pacman::Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* spriteSheet)

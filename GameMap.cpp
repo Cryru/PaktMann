@@ -104,6 +104,22 @@ GameMap* GameMap::LoadMap(const char* mapName) {
 			{
 				Entity* newEntity = entityMap[tileChar](map, x, y);
 				map->entities.push_back(newEntity);
+
+				// Add to correct entity sublist.
+				switch (newEntity->GetType())
+				{
+				case Player:
+					map->playerEntity = newEntity;
+					break;
+				case Enemy:
+					map->enemyEntities.push_back(newEntity);
+					break;
+				case Score:
+					map->scoreEntities.push_back(newEntity);
+					break;
+				default:
+					break;
+				}
 			}
 		}
 	}
@@ -176,6 +192,10 @@ int GameMap::GetHeight()
 
 GameMap::~GameMap()
 {
+	playerEntity = NULL;
+	scoreEntities.clear();
+	enemyEntities.clear();
+
 	map.clear();
 	for (size_t i = 0; i < entities.size(); i++)
 	{
@@ -195,60 +215,35 @@ void GameMap::Update(float dt, const Uint8* keys)
 
 	for (size_t i = 0; i < entities.size(); i++)
 	{
-		Entity* current = entities[i];
-
-		current->Update(dt, keys);
-		if (dynamic_cast<Pacman*>(current))
-		{
-			for (size_t e = 0; e < entities.size(); e++)
-			{
-				Entity* subCurrent = entities[e];
-
-				if (current->x == subCurrent->x && current->y == subCurrent->y && (dynamic_cast<ScoreFruit*>(subCurrent) || dynamic_cast<PowerFruit*>(subCurrent)))
-				{
-					subCurrent->Dead = true;
-					break;
-				}
-			}
-		}
+		entities[i]->Update(dt, keys);
 	}
 
-	// Remove dead entities.
-	entities.erase(std::remove_if(entities.begin(), entities.end(), [](Entity * e) { return e->Dead; }), entities.end());
-
-	// Check for win condition - no fruits left.
-	bool fruitsLeft = false;
-	for (size_t e = 0; e < entities.size(); e++)
+	// Check if there is a score type entity in the player's location.
+	for (size_t i = 0; i < scoreEntities.size(); i++)
 	{
-		Entity* subCurrent = entities[e];
-
-		if (dynamic_cast<ScoreFruit*>(subCurrent) || dynamic_cast<PowerFruit*>(subCurrent))
+		Entity* scoreEntity = scoreEntities[i];
+		if (scoreEntity->x == playerEntity->x && scoreEntity->y == playerEntity->y)
 		{
-			fruitsLeft = true;
-			break;
+			scoreEntity->Dead = true;
+			scoreEntities.erase(scoreEntities.begin() + i);
+			i--;
 		}
 	}
-	if (!fruitsLeft)
+
+	// Check if win condition - no score entities, is met.
+	if (scoreEntities.size() == 0)
 	{
 		state = Won;
 	}
 
-	// Check for lose condition - no Pacman left.
-	bool pacmanLeft = false;
-	for (size_t e = 0; e < entities.size(); e++)
-	{
-		Entity* subCurrent = entities[e];
-
-		if (dynamic_cast<Pacman*>(subCurrent))
-		{
-			pacmanLeft = true;
-			break;
-		}
-	}
-	if (!pacmanLeft)
+	// Check for lose condition - player is dead.
+	if (playerEntity->Dead)
 	{
 		state = Lost;
 	}
+
+	// Remove dead entities.
+	entities.erase(std::remove_if(entities.begin(), entities.end(), [](Entity * e) { return e->Dead; }), entities.end());
 }
 
 /**
@@ -258,7 +253,7 @@ void GameMap::Update(float dt, const Uint8* keys)
  * @param mapSpritesheet The spritesheet to use to draw the tiles.
  * @param entitySpritesheet The spritesheet to use to draw the entities.
  */
-void GameMap::Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* mapSpritesheet, Spritesheet* entitySpritesheet, SDL_Texture* winImage, SDL_Texture* loseImage)
+void GameMap::Draw(SDL_Renderer * renderer, int tileSize, Spritesheet * mapSpritesheet, Spritesheet * entitySpritesheet, SDL_Texture * winImage, SDL_Texture * loseImage)
 {
 	for (size_t x = 0; x < width; x++)
 	{
@@ -290,7 +285,7 @@ void GameMap::Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* mapSprites
 	if (state != Running)
 	{
 		SDL_Rect endImageRect;
-		
+
 		if (state == Won)
 		{
 			SDL_RenderCopy(renderer, winImage, NULL, NULL);

@@ -3,7 +3,7 @@
 
 Ghost::Ghost(GameMap* map, int x, int y, int z) : Entity(map, x, y, z)
 {
-
+	this->type = Enemy;
 }
 
 Ghost::~Ghost()

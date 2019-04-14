@@ -18,6 +18,9 @@ private:
 	int height;
 	std::vector<std::vector<MapTile>> map;
 	std::vector<Entity*> entities;
+	Entity* playerEntity;
+	std::vector<Entity*> scoreEntities;
+	std::vector<Entity*> enemyEntities;
 	GameState state = Running;
 public:
 	GameMap(int width, int height);

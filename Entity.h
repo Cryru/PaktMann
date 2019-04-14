@@ -4,10 +4,19 @@
 
 class GameMap;
 
+enum EntityType
+{
+	Undefined,
+	Player,
+	Enemy,
+	Score
+};
+
 class Entity
 {
 protected:
 	GameMap* map = 0;
+	EntityType type = Undefined;
 public:
 	int x;
 	int y;
@@ -18,5 +27,6 @@ public:
 	virtual void Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* spriteSheet) = 0;
 	virtual ~Entity() = default;
 	static float Lerp(float s, float e, float p);
+	EntityType GetType() const;
 };
 
