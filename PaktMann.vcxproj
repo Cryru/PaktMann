@@ -70,8 +70,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>V:\Dev\PaktMann\PaktMann\Libraries\SDL_Image\include;V:\Dev\PaktMann\PaktMann\Libraries\SDL\include;$(IncludePath)</IncludePath>
-    <LibraryPath>V:\Dev\PaktMann\PaktMann\Libraries\SDL_Image\lib\x86;V:\Dev\PaktMann\PaktMann\Libraries\SDL\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>.\Libraries\SDL_Image\include;.\Libraries\SDL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>.\Libraries\SDL_Image\lib\x86;.\Libraries\SDL\lib\x86;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)\bin\$(Configuration)\</OutDir>
     <IntDir>obj\$(Configuration)\</IntDir>
   </PropertyGroup>
