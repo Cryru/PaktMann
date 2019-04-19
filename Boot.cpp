@@ -73,6 +73,11 @@ int main(int argc, char* args[]) {
 				isRunning = false;
 				break;
 			}
+
+			if (ev.type == SDL_KEYDOWN)
+			{
+				map->Start();
+			}
 		}
 
 		const Uint8* keys = SDL_GetKeyboardState(NULL);

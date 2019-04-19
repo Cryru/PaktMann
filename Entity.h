@@ -12,6 +12,12 @@ enum EntityType
 	Score
 };
 
+enum Event
+{
+	PlayerPoweredUp,
+	PlayerIsOnYourTile
+};
+
 class Entity
 {
 protected:
@@ -25,6 +31,7 @@ public:
 	Entity(GameMap* map, int x, int y, int z);
 	virtual void Update(float dt, const Uint8* keys) = 0;
 	virtual void Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* spriteSheet) = 0;
+	virtual void EventTriggered(Event ev) = 0;
 	virtual ~Entity() = default;
 	static float Lerp(float s, float e, float p);
 	EntityType GetType() const;

@@ -26,4 +26,11 @@ void PowerFruit::Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* spriteS
 
 PowerFruit::~PowerFruit()
 {
+	// If the fruit died - that means it was eaten - which means the player was empowered.
+	// Tell all enemies that.
+	std::vector<Entity*> entities = map->GetEnemies();
+	for (size_t i = 0; i < entities.size(); i++)
+	{
+		entities[i]->EventTriggered(PlayerPoweredUp);
+	}
 }

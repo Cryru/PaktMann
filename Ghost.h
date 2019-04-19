@@ -10,7 +10,7 @@ private:
 
 	// Movement Logic
 	float moveTimer = 0;
-	const float moveSpeed = 250;
+	const float moveSpeed = 300;
 	int moveStartX;
 	int moveStartY;
 	float drawX;
@@ -22,6 +22,16 @@ private:
 	Direction predictedDirection = None;
 	int AIOffset = 0;
 
+	// Afraid AI and Logic
+	bool afraid = false;
+	float afraidTime = 7000;
+	float afraidTimer = 0;
+	float afraidMoveSpeed = 400;
+	bool goHome = false;
+	float goHomeMoveSpeed = 500;
+	int homeX;
+	int homeY;
+
 	// Debug
 	int goalXDebug;
 	int goalYDebug;
@@ -30,5 +40,6 @@ public:
 	~Ghost() override;
 	void Update(float dt, const Uint8* keys) override;
 	void Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* spriteSheet) override;
+	void EventTriggered(Event ev) override;
 };
 
