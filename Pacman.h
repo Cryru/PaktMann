@@ -9,7 +9,7 @@ private:
 	// Animation Logic
 	int animFrame = 0;
 	float timer = 0;
-	const float animSpeed = 300;
+	const float animSpeed = 200;
 
 	// Inputs
 	Uint8 keyUp;
@@ -31,6 +31,7 @@ public:
 	Pacman(GameMap* map, int x, int y, int z, Uint8 keyUp, Uint8 keyDown, Uint8 keyLeft, Uint8 keyRight);
 	void Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* spriteSheet) override;
 	void Update(float dt, const Uint8* keys) override;
+	void EventTriggered(EventType ev) override {};
 	~Pacman() override;
 };
 

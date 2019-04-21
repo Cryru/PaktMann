@@ -9,57 +9,64 @@ Ghost::Ghost(GameMap* map, int x, int y, int z, int sprite, int aiOffset) : Enti
 	this->moveStartY = y;
 	this->sprite = sprite;
 	this->AIOffset = aiOffset;
+
+	this->homeX = x;
+	this->homeY = y;
+
+	this->drawX = (float) x;
+	this->drawY = (float) y;
 }
 
 Ghost::~Ghost()
 {
 }
 
-// Euclidean distance.
-float DistanceToCoodinate(MapTile* myPos, int x, int y)
-{
-	if (myPos == NULL) return 0;
-
-	const float xDist = myPos->x - x;
-	const float yDist = myPos->y - y;
-
-	float dist = pow(xDist, 2) + pow(yDist, 2);
-	dist = sqrt(dist);
-
-	return dist;
-}
-
 void Ghost::Update(float dt, const Uint8 * keys)
 {
 	Entity* player = map->GetPlayer();
-	int goalX = player->x;
-	int goalY = player->y;
 
-	// Predict the direction of the player.
-	if (lastDetectedX < player->x)
+	int goalX = 0;
+	int goalY = 0;
+
+	// If going home the tile is home, otherwise it's the player.
+	if (goHome)
 	{
-		predictedDirection = Right;
-		lastDetectedX = player->x;
+		goalX = homeX;
+		goalY = homeY;
+
+		predictedDirection = None;
 	}
-	if (lastDetectedX > player->x)
+	else
 	{
-		predictedDirection = Left;
-		lastDetectedX = player->x;
-	}
-	if (lastDetectedY < player->y)
-	{
-		predictedDirection = Down;
-		lastDetectedY = player->y;
-	}
-	if (lastDetectedY > player->y)
-	{
-		predictedDirection = Up;
-		lastDetectedY = player->y;
+		goalX = player->x;
+		goalY = player->y;
+
+		// Predict the direction of the player.
+		if (lastDetectedX < player->x)
+		{
+			predictedDirection = Right;
+			lastDetectedX = player->x;
+		}
+		if (lastDetectedX > player->x)
+		{
+			predictedDirection = Left;
+			lastDetectedX = player->x;
+		}
+		if (lastDetectedY < player->y)
+		{
+			predictedDirection = Down;
+			lastDetectedY = player->y;
+		}
+		if (lastDetectedY > player->y)
+		{
+			predictedDirection = Up;
+			lastDetectedY = player->y;
+		}
 	}
 
 	// Apply offset.
 	int offsetApply = AIOffset;
-	while(offsetApply != 0)
+	while (offsetApply != 0)
 	{
 		bool applied = false;
 
@@ -99,12 +106,9 @@ void Ghost::Update(float dt, const Uint8 * keys)
 
 		if (applied) break;
 
-		if(offsetApply < 0) offsetApply += 1;
-		if(offsetApply > 0) offsetApply -= 1;
+		if (offsetApply < 0) offsetApply += 1;
+		if (offsetApply > 0) offsetApply -= 1;
 	}
-
-	goalXDebug = goalX;
-	goalYDebug = goalY;
 
 	// Get neighbor non solid tiles.
 	std::vector<MapTile*> neighbors;
@@ -129,29 +133,49 @@ void Ghost::Update(float dt, const Uint8 * keys)
 		neighbors.push_back(bottom);
 	}
 
-	float lowestDistance = 100;
-	MapTile* closest = NULL;
-	for (int i = 0; i < neighbors.size(); i++)
+	MapTile* goalTile = NULL;
+	float bestDistance = NULL;
+	for (size_t i = 0; i < neighbors.size(); i++)
 	{
-		float distance = DistanceToCoodinate(neighbors[i], goalX, goalY);
-		if (distance < lowestDistance)
+		float distance = Helpers::DistanceToCoordinate(neighbors[i], goalX, goalY);
+
+		// If afraid the goal tile is the one furthest from the player - run.
+		if (afraid && !goHome)
 		{
-			lowestDistance = distance;
-			closest = neighbors[i];
+			if (distance > bestDistance || bestDistance == NULL)
+			{
+				bestDistance = distance;
+				goalTile = neighbors[i];
+			}
+		}
+		// If not afraid the goal tile is the one closes to the player - get em.
+		else
+		{
+			if (distance < bestDistance || bestDistance == NULL)
+			{
+				bestDistance = distance;
+				goalTile = neighbors[i];
+			}
 		}
 	}
 
-	if (closest != NULL)
+	if (goalTile != NULL)
 	{
 		// Check if moving.
 		if (moveTimer > 0)
 		{
+			int moveSpeedCalc = moveSpeed;
+			if (afraid) moveSpeedCalc = afraidMoveSpeed;
+			if (goHome) moveSpeedCalc = goHomeMoveSpeed;
+
 			// Lerp movement so it looks more natural.
 			moveTimer += dt;
-			float p = moveTimer / moveSpeed;
+			float p = moveTimer / moveSpeedCalc;
+			if(p > 1) p = 1;
 			drawX = Helpers::Lerp(moveStartX, x, p);
 			drawY = Helpers::Lerp(moveStartY, y, p);
-			if (moveTimer >= moveSpeed)
+
+			if (moveTimer >= moveSpeedCalc)
 			{
 				drawX = x;
 				drawY = y;
@@ -161,14 +185,33 @@ void Ghost::Update(float dt, const Uint8 * keys)
 		// Check if should move.
 		if (moveTimer == 0)
 		{
-			int velocityX = closest->x - x;
-			int velocityY = closest->y - y;
+			int velocityX = goalTile->x - x;
+			int velocityY = goalTile->y - y;
 
 			moveStartX = x;
 			moveStartY = y;
 			x += velocityX;
 			y += velocityY;
 			moveTimer = dt;
+
+			// Check if should've gone home - and already have.
+			if (goHome && x == homeX && y == homeY)
+			{
+				afraid = false;
+				afraidTimer = 0;
+				goHome = false;
+			}
+		}
+	}
+
+	// Progress afraid timer - if afraid.
+	if (afraid && !goHome)
+	{
+		afraidTimer += dt;
+		if (afraidTimer >= afraidTime)
+		{
+			afraidTimer = 0;
+			afraid = false;
 		}
 	}
 }
@@ -181,14 +224,25 @@ void Ghost::Draw(SDL_Renderer * renderer, int tileSize, Spritesheet * spriteShee
 	loc.w = tileSize;
 	loc.h = tileSize;
 
-	SDL_RenderCopy(renderer, spriteSheet->GetTexture(), spriteSheet->GetFrame(sprite), &loc);
+	int spriteToDraw = sprite;
+	if (afraid) spriteToDraw = 3;
+	if (goHome) spriteToDraw = 8;
 
-	SDL_Rect predictedLoc;
-	predictedLoc.x = (int)(this->goalXDebug * tileSize);
-	predictedLoc.y = (int)(this->goalYDebug * tileSize);
-	predictedLoc.w = tileSize;
-	predictedLoc.h = tileSize;
+	SDL_RenderCopy(renderer, spriteSheet->GetTexture(), spriteSheet->GetFrame(spriteToDraw), &loc);
+}
 
-	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-	SDL_RenderDrawRect(renderer, &predictedLoc);
+void Ghost::EventTriggered(EventType ev)
+{
+	if (ev == PlayerPoweredUp)
+	{
+		afraid = true;
+		afraidTimer = 0;
+	}
+	else if (ev == PlayerIsOnYourTile)
+	{
+		// If the player is on my tile, and I'm not afraid of him (lol) he's dead.
+		// Otherwise, i've been defeated and my go home to regenerate.
+		if (!afraid) map->GetPlayer()->Dead = true;
+		else goHome = true;
+	}
 }

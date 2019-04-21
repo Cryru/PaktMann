@@ -200,6 +200,14 @@ Entity* GameMap::GetPlayer() const
 }
 
 /**
+ * @returns Enemy entities.
+ */
+std::vector<Entity*> GameMap::GetEnemies() const
+{
+	return this->enemyEntities;
+}
+
+/**
  * Get the width of the map in tiles.
  * @returns The width of the map in tiles.
  */
@@ -215,6 +223,15 @@ int GameMap::GetWidth()
 int GameMap::GetHeight()
 {
 	return height;
+}
+
+/**
+ * Start the game! Used to transition from the pregame press any key state to the running state.
+ */
+void GameMap::Start()
+{
+	if(state != PreGame) return;
+	state = Running;
 }
 
 GameMap::~GameMap()
@@ -257,10 +274,14 @@ void GameMap::Update(float dt, const Uint8 * keys)
 		if (scoreEntity->x == playerEntity->x && scoreEntity->y == playerEntity->y)
 		{
 			scoreEntity->Dead = true;
+			delete scoreEntity;
 			scoreEntities.erase(scoreEntities.begin() + i);
 			i--;
 		}
 	}
+
+	// Remove dead entities.
+	entities.erase(std::remove_if(entities.begin(), entities.end(), [](Entity * e) { return e->Dead; }), entities.end());
 
 	// Check if win condition - no score entities, is met.
 	if (scoreEntities.empty())
@@ -268,20 +289,21 @@ void GameMap::Update(float dt, const Uint8 * keys)
 		state = Won;
 	}
 
-	// Check for lose condition - player is on the same square as an enemy.
+	// Check for possible lose condition - if the player is on the same tile as an enemy ask them what happens.
 	for (size_t i = 0; i < enemyEntities.size(); i++)
 	{
 		Entity* enemyEntity = enemyEntities[i];
 		if (enemyEntity->x == playerEntity->x && enemyEntity->y == playerEntity->y)
 		{
-			playerEntity->Dead = true;
-			state = Lost;
-			break;
+			enemyEntity->EventTriggered(PlayerIsOnYourTile);
 		}
 	}
 
-	// Remove dead entities.
-	entities.erase(std::remove_if(entities.begin(), entities.end(), [](Entity * e) { return e->Dead; }), entities.end());
+	// Check for actual lose condition - dead player.
+	if (playerEntity->Dead)
+	{
+		state = Lost;
+	}
 }
 
 /**
