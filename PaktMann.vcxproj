@@ -76,8 +76,8 @@
     <IntDir>obj\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>V:\Dev\PaktMann\PaktMann\Libraries\SDL\include;$(IncludePath)</IncludePath>
-    <LibraryPath>V:\Dev\PaktMann\PaktMann\Libraries\SDL\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>.\Libraries\SDL_Image\include;.\Libraries\SDL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>.\Libraries\SDL_Image\lib\x86;.\Libraries\SDL\lib\x86;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)\bin\$(Configuration)\</OutDir>
     <IntDir>obj\$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -123,7 +123,7 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>XCOPY "$(SolutionDir)"\libs\x86\*.DLL "$(TargetDir)" /D /K /Y</Command>
@@ -172,13 +172,23 @@
     <ClInclude Include="Spritesheet.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Assets\entitySheet.png" />
-    <Image Include="Assets\lose.png" />
-    <Image Include="Assets\mapTiles.png" />
-    <Image Include="Assets\win.png" />
+    <Image Include="Assets\entitySheet.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="Assets\lose.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="Assets\mapTiles.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="Assets\win.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Assets\map.txt" />
+    <Text Include="Assets\map.txt">
+      <DeploymentContent>true</DeploymentContent>
+    </Text>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

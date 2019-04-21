@@ -164,7 +164,7 @@ void Ghost::Update(float dt, const Uint8 * keys)
 		// Check if moving.
 		if (moveTimer > 0)
 		{
-			int moveSpeedCalc = moveSpeed;
+			float moveSpeedCalc = moveSpeed;
 			if (afraid) moveSpeedCalc = afraidMoveSpeed;
 			if (goHome) moveSpeedCalc = goHomeMoveSpeed;
 
@@ -172,13 +172,13 @@ void Ghost::Update(float dt, const Uint8 * keys)
 			moveTimer += dt;
 			float p = moveTimer / moveSpeedCalc;
 			if(p > 1) p = 1;
-			drawX = Helpers::Lerp(moveStartX, x, p);
-			drawY = Helpers::Lerp(moveStartY, y, p);
+			drawX = Helpers::Lerp((float) moveStartX, (float) x, p);
+			drawY = Helpers::Lerp((float) moveStartY, (float) y, p);
 
 			if (moveTimer >= moveSpeedCalc)
 			{
-				drawX = x;
-				drawY = y;
+				drawX = (float) x;
+				drawY = (float) y;
 				moveTimer = 0;
 			}
 		}
