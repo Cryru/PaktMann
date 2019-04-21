@@ -1,5 +1,6 @@
 #include "Ghost.h"
 #include "GameMap.h"
+#include "Helpers.h"
 
 Ghost::Ghost(GameMap* map, int x, int y, int z, int sprite, int aiOffset) : Entity(map, x, y, z)
 {
@@ -130,7 +131,7 @@ void Ghost::Update(float dt, const Uint8 * keys)
 
 	float lowestDistance = 100;
 	MapTile* closest = NULL;
-	for (size_t i = 0; i < neighbors.size(); i++)
+	for (int i = 0; i < neighbors.size(); i++)
 	{
 		float distance = DistanceToCoodinate(neighbors[i], goalX, goalY);
 		if (distance < lowestDistance)
@@ -148,8 +149,8 @@ void Ghost::Update(float dt, const Uint8 * keys)
 			// Lerp movement so it looks more natural.
 			moveTimer += dt;
 			float p = moveTimer / moveSpeed;
-			drawX = Lerp(moveStartX, x, p);
-			drawY = Lerp(moveStartY, y, p);
+			drawX = Helpers::Lerp(moveStartX, x, p);
+			drawY = Helpers::Lerp(moveStartY, y, p);
 			if (moveTimer >= moveSpeed)
 			{
 				drawX = x;

@@ -3,13 +3,7 @@
 
 #include "MapTile.h"
 #include "Entity.h"
-
-enum GameState
-{
-	Running,
-	Won,
-	Lost
-};
+#include "GameState.h"
 
 class GameMap
 {

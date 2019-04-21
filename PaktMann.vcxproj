@@ -150,6 +150,7 @@
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="GameMap.cpp" />
     <ClCompile Include="Ghost.cpp" />
+    <ClCompile Include="Helpers.cpp" />
     <ClCompile Include="MapTile.cpp" />
     <ClCompile Include="Pacman.cpp" />
     <ClCompile Include="PowerFruit.cpp" />
@@ -158,8 +159,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Entity.h" />
+    <ClInclude Include="EntityType.h" />
     <ClInclude Include="GameMap.h" />
+    <ClInclude Include="GameState.h" />
     <ClInclude Include="Ghost.h" />
+    <ClInclude Include="Helpers.h" />
     <ClInclude Include="MapTile.h" />
     <ClInclude Include="Pacman.h" />
     <ClInclude Include="PowerFruit.h" />

@@ -9,11 +9,6 @@ Entity::Entity(GameMap* map, int x, int y, int z)
 	this->map = map;
 }
 
-float Entity::Lerp(const float s, const float e, const float p)
-{
-	return (s + p * (e - s));
-}
-
 EntityType Entity::GetType() const
 {
 	return this->type;

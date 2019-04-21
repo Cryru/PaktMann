@@ -1,5 +1,6 @@
 #include "Pacman.h"
 #include "GameMap.h"
+#include "Helpers.h"
 
 Pacman::Pacman(GameMap* map, int x, int y, int z, Uint8 keyUp, Uint8 keyDown, Uint8 keyLeft, Uint8 keyRight) : Entity(map, x, y, z)
 {
@@ -10,6 +11,9 @@ Pacman::Pacman(GameMap* map, int x, int y, int z, Uint8 keyUp, Uint8 keyDown, Ui
 
 	this->drawX = x;
 	this->drawY = y;
+
+	this->moveStartX = x;
+	this->moveStartY = y;
 
 	this->type = Player;
 }
@@ -73,8 +77,8 @@ void Pacman::Update(const float dt, const Uint8* keys)
 		// Lerp movement so it looks more natural.
 		moveTimer += dt;
 		float p = moveTimer / moveSpeed;
-		drawX = Lerp(moveStartX, x, p);
-		drawY = Lerp(moveStartY, y, p);
+		drawX = Helpers::Lerp(moveStartX, x, p);
+		drawY = Helpers::Lerp(moveStartY, y, p);
 		if (moveTimer >= moveSpeed)
 		{
 			drawX = x;

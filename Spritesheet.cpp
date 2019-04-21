@@ -26,9 +26,9 @@ Spritesheet::Spritesheet(SDL_Renderer* renderer, const char* texturePath, int ti
 	int columns = textureWidth / tileSize;
 	int rows = textureHeight / tileSize;
 
-	for (size_t y = 0; y < rows; y++)
+	for (int y = 0; y < rows; y++)
 	{
-		for (size_t x = 0; x < columns; x++)
+		for (int x = 0; x < columns; x++)
 		{
 			SDL_Rect frame;
 			frame.x = x * tileSize;

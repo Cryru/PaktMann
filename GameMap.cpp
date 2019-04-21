@@ -96,7 +96,7 @@ GameMap* GameMap::LoadMap(const char* mapName) {
 	// Construct the map.
 	GameMap* map = new GameMap(mapWidth, mapHeight);
 
-	for (size_t y = 0; y < mapHeight; y++)
+	for (int y = 0; y < mapHeight; y++)
 	{
 		int lineWidth = total[y].length();
 
@@ -106,7 +106,7 @@ GameMap* GameMap::LoadMap(const char* mapName) {
 			return NULL;
 		}
 
-		for (size_t x = 0; x < lineWidth; x++)
+		for (int x = 0; x < lineWidth; x++)
 		{
 			char tileChar = total[y][x];
 			map->SetTile(x, y, MapTile(x, y, tileChar == '1'));
@@ -151,14 +151,14 @@ GameMap::GameMap(int width, int height)
 	this->width = width;
 	this->height = height;
 	this->entities = std::vector<Entity*>();
+	this->playerEntity = NULL;
 
 	// Fill map with null tiles.
-	for (size_t x = 0; x < width; x++)
+	for (int x = 0; x < width; x++)
 	{
 		map.emplace_back();
-		for (size_t y = 0; y < height; y++)
+		for (int y = 0; y < height; y++)
 		{
-			//map[x].push_back(NULL);
 			map[x].emplace_back();
 		}
 	}
@@ -172,7 +172,7 @@ GameMap::GameMap(int width, int height)
  */
 MapTile* GameMap::GetTile(int x, int y)
 {
-	if(x > map.size() || y > map[0].size())
+	if(x > (int) map.size() || y > (int) map[0].size())
 	{
 		std::cout << "Tried to access tile " << x << ":" << y << " which doesn't exist!";
 		return &map[0][0];
@@ -293,9 +293,9 @@ void GameMap::Update(float dt, const Uint8 * keys)
  */
 void GameMap::Draw(SDL_Renderer * renderer, int tileSize, Spritesheet * mapSpritesheet, Spritesheet * entitySpritesheet, SDL_Texture * winImage, SDL_Texture * loseImage)
 {
-	for (size_t x = 0; x < width; x++)
+	for (int x = 0; x < width; x++)
 	{
-		for (size_t y = 0; y < height; y++)
+		for (int y = 0; y < height; y++)
 		{
 			MapTile* curTile = this->GetTile(x, y);
 
@@ -322,8 +322,6 @@ void GameMap::Draw(SDL_Renderer * renderer, int tileSize, Spritesheet * mapSprit
 	// Check if drawing lose or win.
 	if (state != Running)
 	{
-		SDL_Rect endImageRect;
-
 		if (state == Won)
 		{
 			SDL_RenderCopy(renderer, winImage, NULL, NULL);

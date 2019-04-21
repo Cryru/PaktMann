@@ -1,16 +1,9 @@
 #pragma once
 #include <SDL.h>
 #include "Spritesheet.h"
+#include "EntityType.h"
 
 class GameMap;
-
-enum EntityType
-{
-	Undefined,
-	Player,
-	Enemy,
-	Score
-};
 
 class Entity
 {
@@ -26,7 +19,6 @@ public:
 	virtual void Update(float dt, const Uint8* keys) = 0;
 	virtual void Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* spriteSheet) = 0;
 	virtual ~Entity() = default;
-	static float Lerp(float s, float e, float p);
 	EntityType GetType() const;
 };
 
