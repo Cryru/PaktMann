@@ -1,14 +1,18 @@
 #pragma once
 #include "Entity.h"
 
-class PowerFruit :
-	public Entity
+class power_fruit final :
+	public entity
 {
 public:
-	PowerFruit(GameMap* map, int x, int y, int z);
-	~PowerFruit() override;
-	void Update(float dt, const Uint8* keys) override;
-	void Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* spriteSheet) override;
-	void EventTriggered(EventType ev) override {};
+	power_fruit(game_map* map, int x, int y, int z);
+	void update(float dt, const Uint8* keys) override;
+	void draw(SDL_Renderer* renderer, int tile_size, spritesheet* sprite_sheet) override;
+	void event_triggered(event_type ev) override {};
+	~power_fruit() override;
+	power_fruit(const power_fruit&) = delete;
+	power_fruit& operator=(const power_fruit&) = delete;
+	power_fruit(power_fruit&&) = delete;
+	power_fruit& operator=(power_fruit&&) = delete;
 };
 

@@ -1,12 +1,10 @@
 #pragma once
-class MapTile;
+class map_tile;
 
-class Helpers
+class helpers
 {
 public:
-	Helpers();
-	~Helpers();
-	static float Lerp(float s, float e, float p);
-	static float DistanceToCoordinate(MapTile* myPos, int x, int y);
+	static float lerp(float s, float e, float p);
+	static float distance_to_coordinate(map_tile* my_pos, int x, int y);
 };
 

@@ -1,21 +1,22 @@
 #pragma once
 #include <SDL.h>
 #include <vector>
-#include <iostream>
-#include <SDL_image.h>
 
-class Spritesheet
+class spritesheet
 {
-private:
-	std::vector<SDL_Rect> frames;
-	SDL_Texture* texture;
-	int textureWidth;
-	int textureHeight;
+	std::vector<SDL_Rect> frames_;
+	SDL_Texture* texture_;
+	int texture_width_;
+	int texture_height_;
 public:
-	Spritesheet(SDL_Renderer* renderer, const char* texturePath, int tileSize);
-	~Spritesheet();
-	SDL_Texture* GetTexture() const;
-	SDL_Rect* GetFrame(int i);
-	static SDL_Texture* LoadTexture(SDL_Renderer* renderer, const char* fileName);
+	spritesheet(SDL_Renderer* renderer, const char* texture_path, int tile_size);
+	SDL_Texture* get_texture() const;
+	SDL_Rect* get_frame(int i);
+	static SDL_Texture* load_texture(SDL_Renderer* renderer, const char* file_name);
+	~spritesheet();
+	spritesheet(const spritesheet&) = delete;
+	spritesheet& operator=(const spritesheet&) = delete;
+	spritesheet(spritesheet&&) = delete;
+	spritesheet& operator=(spritesheet&&) = delete;
 };
 

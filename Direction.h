@@ -1,10 +1,10 @@
 #pragma once
 
-enum Direction
+enum direction
 {
-	None,
-	Left,
-	Right,
-	Up,
-	Down
+	none,
+	left,
+	right,
+	up,
+	down
 };

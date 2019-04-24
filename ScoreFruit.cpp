@@ -1,29 +1,28 @@
 #include "ScoreFruit.h"
 #include "GameMap.h"
 
-ScoreFruit::ScoreFruit(GameMap* map, int x, int y, int z) : Entity(map, x, y, z)
+score_fruit::score_fruit(game_map* map, int x, int y, int z) : entity(map, x, y, z)
 {
-	this->type = Score;
+	this->type_ = score;
 }
 
-void ScoreFruit::Update(float dt, const Uint8* keys)
+void score_fruit::update(float dt, const Uint8* keys)
 {
 }
 
-void ScoreFruit::Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* spriteSheet)
+void score_fruit::draw(SDL_Renderer* renderer, int tile_size, spritesheet* sprite_sheet)
 {
-	if(Dead) return;
+	if (dead) return;
 
 	SDL_Rect loc;
-	loc.x = this->x * tileSize;
-	loc.y = this->y * tileSize;
-	loc.w = tileSize;
-	loc.h = tileSize;
+	loc.x = this->x * tile_size;
+	loc.y = this->y * tile_size;
+	loc.w = tile_size;
+	loc.h = tile_size;
 
-	SDL_RenderCopy(renderer, spriteSheet->GetTexture(), spriteSheet->GetFrame(4), &loc);
+	SDL_RenderCopy(renderer, sprite_sheet->get_texture(), sprite_sheet->get_frame(4), &loc);
 }
 
-ScoreFruit::~ScoreFruit()
+void score_fruit::event_triggered(event_type ev)
 {
-
 }

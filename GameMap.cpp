@@ -14,120 +14,114 @@
 #include <algorithm>
 
 // Entity factory.
-Pacman* createPacman(GameMap* map, int x, int y)
+pacman* create_pacman(game_map* map, const int x, const int y)
 {
-	Uint8 keyW = SDL_GetScancodeFromName("W");
-	Uint8 keyS = SDL_GetScancodeFromName("S");
-	Uint8 keyA = SDL_GetScancodeFromName("A");
-	Uint8 keyD = SDL_GetScancodeFromName("D");
+	const Uint8 key_w = SDL_GetScancodeFromName("W");
+	const Uint8 key_s = SDL_GetScancodeFromName("S");
+	const Uint8 key_a = SDL_GetScancodeFromName("A");
+	const Uint8 key_d = SDL_GetScancodeFromName("D");
 
-	return new Pacman(map, x, y, 3, keyW, keyS, keyA, keyD);
+	return new pacman(map, x, y, 3, key_w, key_s, key_a, key_d);
 }
 
-Ghost* createGhostF(GameMap* map, int x, int y)
+ghost* create_ghost_f(game_map* map, const int x, const int y)
 {
-	return new Ghost(map, x, y, 4, 2, 5);
+	return new ghost(map, x, y, 4, 2, 5);
 }
 
-Ghost* createGhostG(GameMap* map, int x, int y)
+ghost* create_ghost_g(game_map* map, const int x, const  int y)
 {
-	return new Ghost(map, x, y, 4, 6, 0);
+	return new ghost(map, x, y, 4, 6, 0);
 }
 
-Ghost* createGhostH(GameMap* map, int x, int y)
+ghost* create_ghost_h(game_map* map, const int x, const int y)
 {
-	return new Ghost(map, x, y, 4, 7, -5);
+	return new ghost(map, x, y, 4, 7, -5);
 }
 
-ScoreFruit* createScoreFruit(GameMap * map, int x, int y)
+score_fruit* create_score_fruit(game_map * map, const int x, const int y)
 {
-	return new ScoreFruit(map, x, y, 1);
+	return new score_fruit(map, x, y, 1);
 }
 
-PowerFruit* createPowerFruit(GameMap * map, int x, int y)
+power_fruit* create_power_fruit(game_map * map, const int x, const int y)
 {
-	return new PowerFruit(map, x, y, 1);
+	return new power_fruit(map, x, y, 1);
 }
 
-typedef Entity* (*entityCreator)(GameMap * map, int, int);
+typedef entity* (*entity_creator)(game_map * map, int, int);
 
-std::map<char, entityCreator> entityMap = {
-	{ 'p', (entityCreator)createPacman },
-	{ 'f', (entityCreator)createGhostF },
-	{ 'g', (entityCreator)createGhostG },
-	{ 'h', (entityCreator)createGhostH },
-	{ '0', (entityCreator)createScoreFruit },
-	{ 's', (entityCreator)createPowerFruit }
+std::map<char, entity_creator> entity_map = {
+	{ 'p', reinterpret_cast<entity_creator>(create_pacman) },
+	{ 'f', reinterpret_cast<entity_creator>(create_ghost_f) },
+	{ 'g', reinterpret_cast<entity_creator>(create_ghost_g) },
+	{ 'h', reinterpret_cast<entity_creator>(create_ghost_h) },
+	{ '0', reinterpret_cast<entity_creator>(create_score_fruit) },
+	{ 's', reinterpret_cast<entity_creator>(create_power_fruit) }
 };
 
-/**
- * Creates a GameMap object from the specified file.
- *
- * @param mapName The file name of the text file to parse. The file is expected to be arbitrary preformatted(tm).
- * @return The loaded and ready to use map.
- */
-GameMap* GameMap::LoadMap(const char* mapName) {
+game_map* game_map::load_map(const char* map_name) {
 	// Read the file.
 	std::vector<std::string> total;
 	std::string line;
-	std::ifstream mapFile(mapName);
-	if (mapFile.is_open())
+	std::ifstream map_file(map_name);
+	if (map_file.is_open())
 	{
-		while (std::getline(mapFile, line))
+		while (std::getline(map_file, line))
 		{
 			total.push_back(line);
 		}
-		mapFile.close();
+		map_file.close();
 	}
 	else {
-		std::cerr << "Map file " << mapName << " not found!\n";
-		return NULL;
+		std::cerr << "Map file " << map_name << " not found!\n";
+		return nullptr;
 	}
 
 	// Verify map format
-	int mapHeight = total.size();
-	int mapWidth = mapHeight > 0 ? total[0].length() : 0;
+	const int map_height = total.size();
+	const int map_width = map_height > 0 ? total[0].length() : 0;
 
-	if (mapWidth == 0 || mapHeight == 0) {
-		std::cerr << "Map file " << mapName << " is not properly formatted!\n";
-		return NULL;
+	if (map_width == 0 || map_height == 0) {
+		std::cerr << "Map file " << map_name << " is not properly formatted!\n";
+		return nullptr;
 	}
 
 	// Construct the map.
-	GameMap* map = new GameMap(mapWidth, mapHeight);
+	game_map* map = new game_map(map_width, map_height);
 
-	for (int y = 0; y < mapHeight; y++)
+	for (int y = 0; y < map_height; y++)
 	{
-		int lineWidth = total[y].length();
+		const int line_width = total[y].length();
 
 		// Verify map line width compared to map width.
-		if (lineWidth != mapWidth) {
-			std::cerr << "Map file " << mapName << " is not properly formatted on line" << y << "!\n";
-			return NULL;
+		if (line_width != map_width) {
+			std::cerr << "Map file " << map_name << " is not properly formatted on line" << y << "!\n";
+			return nullptr;
 		}
 
-		for (int x = 0; x < lineWidth; x++)
+		for (int x = 0; x < line_width; x++)
 		{
-			char tileChar = total[y][x];
-			map->SetTile(x, y, MapTile(x, y, tileChar == '1'));
+			char tile_char = total[y][x];
+			map->set_tile(x, y, new map_tile(x, y, tile_char == '1'));
 
 			// Check if creating an entity.
-			if (entityMap[tileChar] != NULL)
+			if (entity_map[tile_char] != nullptr)
 			{
-				Entity* newEntity = entityMap[tileChar](map, x, y);
-				map->entities.push_back(newEntity);
+				entity* new_entity = entity_map[tile_char](map, x, y);
+				map->entities_.push_back(new_entity);
 
 				// Add to correct entity sublist.
-				switch (newEntity->GetType())
+				switch (new_entity->get_type())
 				{
-				case Player:
-					map->playerEntity = newEntity;
+				case player:
+					map->player_entity_ = new_entity;
 					break;
-				case Enemy:
-					map->enemyEntities.push_back(newEntity);
+				case enemy:
+					map->enemy_entities_.push_back(new_entity);
 					break;
-				case Score:
-					map->scoreEntities.push_back(newEntity);
+				case score:
+					map->score_entities_.push_back(new_entity);
 					break;
 				default:
 					break;
@@ -136,221 +130,179 @@ GameMap* GameMap::LoadMap(const char* mapName) {
 		}
 	}
 
-	std::sort(map->entities.begin(), map->entities.end(), [](Entity * x, Entity * y) { return x->z < y->z; });
+	std::sort(map->entities_.begin(), map->entities_.end(), [](entity * x, entity * y) { return x->z < y->z; });
 
 	return map;
 }
 
-/**
- * Create a new game map. After creation all tiles are NULL and must be manually created.
- * @param width The width of the map in tiles.
- * @param height The height of the map in tiles.
- */
-GameMap::GameMap(int width, int height)
+game_map::game_map(const int width, const int height)
 {
-	this->width = width;
-	this->height = height;
-	this->entities = std::vector<Entity*>();
-	this->playerEntity = NULL;
+	this->width_ = width;
+	this->height_ = height;
+	this->entities_ = std::vector<entity*>();
+	this->player_entity_ = nullptr;
 
 	// Fill map with null tiles.
 	for (int x = 0; x < width; x++)
 	{
-		map.emplace_back();
+		map_.emplace_back();
 		for (int y = 0; y < height; y++)
 		{
-			map[x].emplace_back();
+			map_[x].emplace_back();
 		}
 	}
 }
 
-/**
- * Get the MapTile located at the specified coordinates.
- * @param x The x axis coordinate of the tile within the map.
- * @param y The y axis coordinate of the tile within the map.
- * @returns The MapTile object located at the coordinates, or NULL if none.
- */
-MapTile* GameMap::GetTile(int x, int y)
+map_tile* game_map::get_tile(const int x, const int y)
 {
-	if(x > (int) map.size() || y > (int) map[0].size())
+	if (x > static_cast<int>(map_.size()) || y > static_cast<int>(map_[0].size()))
 	{
 		std::cout << "Tried to access tile " << x << ":" << y << " which doesn't exist!";
-		return &map[0][0];
+		return map_[0][0];
 	}
 
-	return &map[x][y];
+	return map_[x][y];
 }
 
-/**
- * Set the MapTile located at the specified coordinates.
- * @param x The x axis coordinate of the tile within the map.
- * @param y The y axis coordinate of the tile within the map.
- * @param tileData The MapTile object to associate with the specified coordinates.
- */
-void GameMap::SetTile(int x, int y, MapTile tileData) {
-	map[x][y] = (tileData);
+void game_map::set_tile(const int x, const int y, map_tile * tile_data) {
+	map_[x][y] = (tile_data);
 }
 
-/**
- * @returns The player entity.
- */
-Entity* GameMap::GetPlayer() const
+entity* game_map::get_player() const
 {
-	return playerEntity;
+	return player_entity_;
 }
 
-/**
- * @returns Enemy entities.
- */
-std::vector<Entity*> GameMap::GetEnemies() const
+std::vector<entity*> game_map::get_enemies() const
 {
-	return this->enemyEntities;
+	return this->enemy_entities_;
 }
 
-/**
- * Get the width of the map in tiles.
- * @returns The width of the map in tiles.
- */
-int GameMap::GetWidth()
+int game_map::get_width() const
 {
-	return width;
+	return width_;
 }
 
-/**
- * Get the height of the map in tiles.
- * @returns The height of the map in tiles.
- */
-int GameMap::GetHeight()
+int game_map::get_height() const
 {
-	return height;
+	return height_;
 }
 
-/**
- * Start the game! Used to transition from the pregame press any key state to the running state.
- */
-void GameMap::Start()
+void game_map::start()
 {
-	if(state != PreGame) return;
-	state = Running;
+	if (state_ != pre_game) return;
+	state_ = running;
 }
 
-GameMap::~GameMap()
+game_map::~game_map()
 {
-	playerEntity = NULL;
-	scoreEntities.clear();
-	enemyEntities.clear();
+	player_entity_ = nullptr;
+	score_entities_.clear();
+	enemy_entities_.clear();
 
-	for (size_t i = 0; i < map.size(); i++)
+	for (std::vector<map_tile*> i : map_)
 	{
-		map[i].clear();
+		for (map_tile* p : i)
+		{
+			delete p;
+		}
+		i.clear();
 	}
-	map.clear();
+	map_.clear();
 
-	for (size_t i = 0; i < entities.size(); i++)
+	for (entity* entity : entities_)
 	{
-		delete entities[i];
+		delete entity;
 	}
-	entities.clear();
+	entities_.clear();
 }
 
-/**
- * Update all entities in the map.
- * @param dt The time passed since the last update.
- */
-void GameMap::Update(float dt, const Uint8 * keys)
+void game_map::update(const float dt, const Uint8 * keys)
 {
 	// Check if running.
-	if (state != Running) return;
+	if (state_ != running) return;
 
-	for (size_t i = 0; i < entities.size(); i++)
+	for (entity* entity : entities_)
 	{
-		entities[i]->Update(dt, keys);
+		entity->update(dt, keys);
 	}
 
 	// Check if there is a score type entity in the player's location.
-	for (size_t i = 0; i < scoreEntities.size(); i++)
+	for (size_t i = 0; i < score_entities_.size(); i++)
 	{
-		Entity* scoreEntity = scoreEntities[i];
-		if (scoreEntity->x == playerEntity->x && scoreEntity->y == playerEntity->y)
+		entity* score_entity = score_entities_[i];
+		if (score_entity->x == player_entity_->x && score_entity->y == player_entity_->y)
 		{
-			scoreEntity->Dead = true;
-			delete scoreEntity;
-			scoreEntities.erase(scoreEntities.begin() + i);
+			score_entity->dead = true;
+			delete score_entity;
+			score_entities_.erase(score_entities_.begin() + i);
 			i--;
 		}
 	}
 
 	// Remove dead entities.
-	entities.erase(std::remove_if(entities.begin(), entities.end(), [](Entity * e) { return e->Dead; }), entities.end());
+	entities_.erase(std::remove_if(entities_.begin(), entities_.end(), [](entity * e) { return e->dead; }), entities_.end());
 
 	// Check if win condition - no score entities, is met.
-	if (scoreEntities.empty())
+	if (score_entities_.empty())
 	{
-		state = Won;
+		state_ = won;
 	}
 
 	// Check for possible lose condition - if the player is on the same tile as an enemy ask them what happens.
-	for (size_t i = 0; i < enemyEntities.size(); i++)
+	for (entity* enemy_entity : enemy_entities_)
 	{
-		Entity* enemyEntity = enemyEntities[i];
-		if (enemyEntity->x == playerEntity->x && enemyEntity->y == playerEntity->y)
+		if (enemy_entity->x == player_entity_->x && enemy_entity->y == player_entity_->y)
 		{
-			enemyEntity->EventTriggered(PlayerIsOnYourTile);
+			enemy_entity->event_triggered(player_is_on_your_tile);
 		}
 	}
 
 	// Check for actual lose condition - dead player.
-	if (playerEntity->Dead)
+	if (player_entity_->dead)
 	{
-		state = Lost;
+		state_ = lost;
 	}
 }
 
-/**
- * Draw all entities in the map.
- * @param renderer The SDL renderer to use.
- * @param tileSize The size of the tiles to render.
- * @param mapSpritesheet The spritesheet to use to draw the tiles.
- * @param entitySpritesheet The spritesheet to use to draw the entities.
- */
-void GameMap::Draw(SDL_Renderer * renderer, int tileSize, Spritesheet * mapSpritesheet, Spritesheet * entitySpritesheet, SDL_Texture * winImage, SDL_Texture * loseImage)
+void game_map::draw(SDL_Renderer * renderer, const int tile_size, spritesheet * map_spritesheet, spritesheet * entity_spritesheet, SDL_Texture * win_image, SDL_Texture * lose_image)
 {
-	for (int x = 0; x < width; x++)
+	for (int x = 0; x < width_; x++)
 	{
-		for (int y = 0; y < height; y++)
+		for (int y = 0; y < height_; y++)
 		{
-			MapTile* curTile = this->GetTile(x, y);
+			map_tile* cur_tile = this->get_tile(x, y);
 
-			SDL_Rect tileRect;
-			tileRect.x = x * tileSize;
-			tileRect.y = y * tileSize;
-			tileRect.w = tileSize;
-			tileRect.h = tileSize;
+			SDL_Rect tile_rect;
+			tile_rect.x = x * tile_size;
+			tile_rect.y = y * tile_size;
+			tile_rect.w = tile_size;
+			tile_rect.h = tile_size;
 
-			if (curTile->Solid) {
-				SDL_RenderCopy(renderer, mapSpritesheet->GetTexture(), mapSpritesheet->GetFrame(0), &tileRect);
+			if (cur_tile->solid) {
+				SDL_RenderCopy(renderer, map_spritesheet->get_texture(), map_spritesheet->get_frame(0), &tile_rect);
 			}
 			else {
-				SDL_RenderCopy(renderer, mapSpritesheet->GetTexture(), mapSpritesheet->GetFrame(1), &tileRect);
+				SDL_RenderCopy(renderer, map_spritesheet->get_texture(), map_spritesheet->get_frame(1), &tile_rect);
 			}
 		}
 	}
 
-	for (size_t i = 0; i < entities.size(); i++)
+	for (entity* entity : entities_)
 	{
-		entities[i]->Draw(renderer, tileSize, entitySpritesheet);
+		entity->draw(renderer, tile_size, entity_spritesheet);
 	}
 
 	// Check if drawing lose or win.
-	if (state != Running)
+	if (state_ != running)
 	{
-		if (state == Won)
+		if (state_ == won)
 		{
-			SDL_RenderCopy(renderer, winImage, NULL, NULL);
+			SDL_RenderCopy(renderer, win_image, nullptr, nullptr);
 		}
-		else if (state == Lost)
+		else if (state_ == lost)
 		{
-			SDL_RenderCopy(renderer, loseImage, NULL, NULL);
+			SDL_RenderCopy(renderer, lose_image, nullptr, nullptr);
 		}
 	}
 }

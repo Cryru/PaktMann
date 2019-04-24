@@ -1,21 +1,15 @@
 #include "MapTile.h"
 
-MapTile::MapTile()
+map_tile::map_tile()
 {
 	this->x = 0;
 	this->y = 0;
-	this->Solid = false;
+	this->solid = false;
 }
 
-MapTile::MapTile(int x, int y, bool solid)
+map_tile::map_tile(const int x, const int y, const bool solid)
 {
 	this->x = x;
 	this->y = y;
-	this->Solid = solid;
-}
-
-
-MapTile::~MapTile()
-{
-
+	this->solid = solid;
 }

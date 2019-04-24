@@ -1,15 +1,15 @@
 #include "Entity.h"
 #include "GameMap.h"
 
-Entity::Entity(GameMap* map, int x, int y, int z)
+entity::entity(game_map* map, int x, int y, int z)
 {
 	this->x = x;
 	this->y = y;
 	this->z = z;
-	this->map = map;
+	this->map_ = map;
 }
 
-EntityType Entity::GetType() const
+entity_type entity::get_type() const
 {
-	return this->type;
+	return this->type_;
 }

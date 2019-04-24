@@ -2,103 +2,99 @@
 #include "GameMap.h"
 #include "Helpers.h"
 
-Ghost::Ghost(GameMap* map, int x, int y, int z, int sprite, int aiOffset) : Entity(map, x, y, z)
+ghost::ghost(game_map* map, const int x, const int y, const int z, const int sprite, const int ai_offset) : entity(map, x, y, z)
 {
-	this->type = Enemy;
-	this->moveStartX = x;
-	this->moveStartY = y;
-	this->sprite = sprite;
-	this->AIOffset = aiOffset;
+	this->type_ = enemy;
+	this->move_start_x_ = x;
+	this->move_start_y_ = y;
+	this->sprite_ = sprite;
+	this->ai_offset_ = ai_offset;
 
-	this->homeX = x;
-	this->homeY = y;
+	this->home_x_ = x;
+	this->home_y_ = y;
 
-	this->drawX = (float) x;
-	this->drawY = (float) y;
+	this->draw_x_ = static_cast<float>(x);
+	this->draw_y_ = static_cast<float>(y);
 }
 
-Ghost::~Ghost()
+void ghost::update(const float dt, const Uint8* keys)
 {
-}
+	entity* player = map_->get_player();
 
-void Ghost::Update(float dt, const Uint8 * keys)
-{
-	Entity* player = map->GetPlayer();
-
-	int goalX = 0;
-	int goalY = 0;
+	int goal_x;
+	int goal_y;
 
 	// If going home the tile is home, otherwise it's the player.
-	if (goHome)
+	if (go_home_)
 	{
-		goalX = homeX;
-		goalY = homeY;
+		goal_x = home_x_;
+		goal_y = home_y_;
 
-		predictedDirection = None;
+		predicted_direction_ = none;
 	}
 	else
 	{
-		goalX = player->x;
-		goalY = player->y;
+		goal_x = player->x;
+		goal_y = player->y;
 
 		// Predict the direction of the player.
-		if (lastDetectedX < player->x)
+		if (last_detected_x_ < player->x)
 		{
-			predictedDirection = Right;
-			lastDetectedX = player->x;
+			predicted_direction_ = right;
+			last_detected_x_ = player->x;
 		}
-		if (lastDetectedX > player->x)
+		if (last_detected_x_ > player->x)
 		{
-			predictedDirection = Left;
-			lastDetectedX = player->x;
+			predicted_direction_ = left;
+			last_detected_x_ = player->x;
 		}
-		if (lastDetectedY < player->y)
+		if (last_detected_y_ < player->y)
 		{
-			predictedDirection = Down;
-			lastDetectedY = player->y;
+			predicted_direction_ = down;
+			last_detected_y_ = player->y;
 		}
-		if (lastDetectedY > player->y)
+		if (last_detected_y_ > player->y)
 		{
-			predictedDirection = Up;
-			lastDetectedY = player->y;
+			predicted_direction_ = up;
+			last_detected_y_ = player->y;
 		}
 	}
 
 	// Apply offset.
-	int offsetApply = AIOffset;
-	while (offsetApply != 0)
+	int offset_apply = ai_offset_;
+	while (offset_apply != 0)
 	{
 		bool applied = false;
 
 		// Move in the directed prediction by the offset.
-		switch (predictedDirection)
+		switch (predicted_direction_)
 		{
-		case Left:
-			if (goalX - offsetApply > 0 && goalX - offsetApply < map->GetWidth() && !map->GetTile(goalX - offsetApply, goalY)->Solid)
+		case left:
+			if (goal_x - offset_apply > 0 && goal_x - offset_apply < map_->get_width() && !map_->get_tile(goal_x - offset_apply, goal_y)->solid)
 			{
 				applied = true;
-				goalX -= offsetApply;
+				goal_x -= offset_apply;
 			}
 			break;
-		case Right:
-			if (goalX + offsetApply > 0 && goalX + offsetApply < map->GetWidth() && !map->GetTile(goalX + offsetApply, goalY)->Solid)
+		case right:
+			if (goal_x + offset_apply > 0 && goal_x + offset_apply < map_->get_width() && !map_->get_tile(goal_x + offset_apply, goal_y)->solid)
 			{
 				applied = true;
-				goalX += offsetApply;
+				goal_x += offset_apply;
 			}
 			break;
-		case Up:
-			if (goalY - offsetApply > 0 && goalY - offsetApply < map->GetHeight() && !map->GetTile(goalX, goalY - offsetApply)->Solid)
+		case up:
+			if (goal_y - offset_apply > 0 && goal_y - offset_apply < map_->get_height() && !map_->get_tile(goal_x, goal_y - offset_apply)->solid)
 			{
 				applied = true;
-				goalY -= offsetApply;
+				goal_y -= offset_apply;
 			}
 			break;
-		case Down:
-			if (goalY + offsetApply > 0 && goalY + offsetApply < map->GetHeight() && !map->GetTile(goalX, goalY + offsetApply)->Solid)
+		case down:
+			if (goal_y + offset_apply > 0 && goal_y + offset_apply < map_->get_height() && !map_->get_tile(goal_x, goal_y + offset_apply)->solid)
 			{
 				applied = true;
-				goalY += offsetApply;
+				goal_y += offset_apply;
 			}
 			break;
 		default:;
@@ -106,143 +102,143 @@ void Ghost::Update(float dt, const Uint8 * keys)
 
 		if (applied) break;
 
-		if (offsetApply < 0) offsetApply += 1;
-		if (offsetApply > 0) offsetApply -= 1;
+		if (offset_apply < 0) offset_apply += 1;
+		if (offset_apply > 0) offset_apply -= 1;
 	}
 
 	// Get neighbor non solid tiles.
-	std::vector<MapTile*> neighbors;
-	MapTile* left = map->GetTile(x - 1, y);
-	MapTile* right = map->GetTile(x + 1, y);
-	MapTile* top = map->GetTile(x, y - 1);
-	MapTile * bottom = map->GetTile(x, y + 1);
-	if (!left->Solid && moveStartX != x - 1)
+	std::vector<map_tile*> neighbors;
+	map_tile* left = map_->get_tile(x - 1, y);
+	map_tile* right = map_->get_tile(x + 1, y);
+	map_tile* top = map_->get_tile(x, y - 1);
+	map_tile * bottom = map_->get_tile(x, y + 1);
+	if (!left->solid && move_start_x_ != x - 1)
 	{
 		neighbors.push_back(left);
 	}
-	if (!right->Solid && moveStartX != x + 1)
+	if (!right->solid && move_start_x_ != x + 1)
 	{
 		neighbors.push_back(right);
 	}
-	if (!top->Solid && moveStartY != y - 1)
+	if (!top->solid && move_start_y_ != y - 1)
 	{
 		neighbors.push_back(top);
 	}
-	if (!bottom->Solid && moveStartY != y + 1)
+	if (!bottom->solid && move_start_y_ != y + 1)
 	{
 		neighbors.push_back(bottom);
 	}
 
-	MapTile* goalTile = NULL;
-	float bestDistance = NULL;
-	for (size_t i = 0; i < neighbors.size(); i++)
+	map_tile* goal_tile = nullptr;
+	float best_distance = 0;
+	for (map_tile* neighbor : neighbors)
 	{
-		float distance = Helpers::DistanceToCoordinate(neighbors[i], goalX, goalY);
+		const float distance = helpers::distance_to_coordinate(neighbor, goal_x, goal_y);
 
 		// If afraid the goal tile is the one furthest from the player - run.
-		if (afraid && !goHome)
+		if (afraid_ && !go_home_)
 		{
-			if (distance > bestDistance || bestDistance == NULL)
+			if (distance > best_distance || best_distance == NULL)
 			{
-				bestDistance = distance;
-				goalTile = neighbors[i];
+				best_distance = distance;
+				goal_tile = neighbor;
 			}
 		}
 		// If not afraid the goal tile is the one closes to the player - get em.
 		else
 		{
-			if (distance < bestDistance || bestDistance == NULL)
+			if (distance < best_distance || best_distance == NULL)
 			{
-				bestDistance = distance;
-				goalTile = neighbors[i];
+				best_distance = distance;
+				goal_tile = neighbor;
 			}
 		}
 	}
 
-	if (goalTile != NULL)
+	if (goal_tile != nullptr)
 	{
 		// Check if moving.
-		if (moveTimer > 0)
+		if (move_timer_ > 0)
 		{
-			float moveSpeedCalc = moveSpeed;
-			if (afraid) moveSpeedCalc = afraidMoveSpeed;
-			if (goHome) moveSpeedCalc = goHomeMoveSpeed;
+			float move_speed_calc = move_speed_;
+			if (afraid_) move_speed_calc = afraid_move_speed_;
+			if (go_home_) move_speed_calc = go_home_move_speed_;
 
 			// Lerp movement so it looks more natural.
-			moveTimer += dt;
-			float p = moveTimer / moveSpeedCalc;
-			if(p > 1) p = 1;
-			drawX = Helpers::Lerp((float) moveStartX, (float) x, p);
-			drawY = Helpers::Lerp((float) moveStartY, (float) y, p);
+			move_timer_ += dt;
+			float p = move_timer_ / move_speed_calc;
+			if (p > 1) p = 1;
+			draw_x_ = helpers::lerp(static_cast<float>(move_start_x_), static_cast<float>(x), p);
+			draw_y_ = helpers::lerp(static_cast<float>(move_start_y_), static_cast<float>(y), p);
 
-			if (moveTimer >= moveSpeedCalc)
+			if (move_timer_ >= move_speed_calc)
 			{
-				drawX = (float) x;
-				drawY = (float) y;
-				moveTimer = 0;
+				draw_x_ = static_cast<float>(x);
+				draw_y_ = static_cast<float>(y);
+				move_timer_ = 0;
 			}
 		}
 		// Check if should move.
-		if (moveTimer == 0)
+		if (move_timer_ == 0)
 		{
-			int velocityX = goalTile->x - x;
-			int velocityY = goalTile->y - y;
+			const int velocity_x = goal_tile->x - x;
+			const int velocity_y = goal_tile->y - y;
 
-			moveStartX = x;
-			moveStartY = y;
-			x += velocityX;
-			y += velocityY;
-			moveTimer = dt;
+			move_start_x_ = x;
+			move_start_y_ = y;
+			x += velocity_x;
+			y += velocity_y;
+			move_timer_ = dt;
 
 			// Check if should've gone home - and already have.
-			if (goHome && x == homeX && y == homeY)
+			if (go_home_ && x == home_x_ && y == home_y_)
 			{
-				afraid = false;
-				afraidTimer = 0;
-				goHome = false;
+				afraid_ = false;
+				afraid_timer_ = 0;
+				go_home_ = false;
 			}
 		}
 	}
 
 	// Progress afraid timer - if afraid.
-	if (afraid && !goHome)
+	if (afraid_ && !go_home_)
 	{
-		afraidTimer += dt;
-		if (afraidTimer >= afraidTime)
+		afraid_timer_ += dt;
+		if (afraid_timer_ >= afraid_time_)
 		{
-			afraidTimer = 0;
-			afraid = false;
+			afraid_timer_ = 0;
+			afraid_ = false;
 		}
 	}
 }
 
-void Ghost::Draw(SDL_Renderer * renderer, int tileSize, Spritesheet * spriteSheet)
+void ghost::draw(SDL_Renderer* renderer, const int tile_size, spritesheet* sprite_sheet)
 {
 	SDL_Rect loc;
-	loc.x = (int)(this->drawX * tileSize);
-	loc.y = (int)(this->drawY * tileSize);
-	loc.w = tileSize;
-	loc.h = tileSize;
+	loc.x = static_cast<int>(this->draw_x_ * tile_size);
+	loc.y = static_cast<int>(this->draw_y_ * tile_size);
+	loc.w = tile_size;
+	loc.h = tile_size;
 
-	int spriteToDraw = sprite;
-	if (afraid) spriteToDraw = 3;
-	if (goHome) spriteToDraw = 8;
+	int sprite_to_draw = sprite_;
+	if (afraid_) sprite_to_draw = 3;
+	if (go_home_) sprite_to_draw = 8;
 
-	SDL_RenderCopy(renderer, spriteSheet->GetTexture(), spriteSheet->GetFrame(spriteToDraw), &loc);
+	SDL_RenderCopy(renderer, sprite_sheet->get_texture(), sprite_sheet->get_frame(sprite_to_draw), &loc);
 }
 
-void Ghost::EventTriggered(EventType ev)
+void ghost::event_triggered(const event_type ev)
 {
-	if (ev == PlayerPoweredUp)
+	if (ev == player_powered_up)
 	{
-		afraid = true;
-		afraidTimer = 0;
+		afraid_ = true;
+		afraid_timer_ = 0;
 	}
-	else if (ev == PlayerIsOnYourTile)
+	else if (ev == player_is_on_your_tile)
 	{
 		// If the player is on my tile, and I'm not afraid of him (lol) he's dead.
 		// Otherwise, i've been defeated and my go home to regenerate.
-		if (!afraid) map->GetPlayer()->Dead = true;
-		else goHome = true;
+		if (!afraid_) map_->get_player()->dead = true;
+		else go_home_ = true;
 	}
 }

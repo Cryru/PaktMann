@@ -1,8 +1,9 @@
 #pragma once
-enum EntityType
+
+enum entity_type
 {
-	Undefined,
-	Player,
-	Enemy,
-	Score
+	undefined,
+	player,
+	enemy,
+	score
 };

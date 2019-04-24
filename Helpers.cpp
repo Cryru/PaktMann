@@ -2,28 +2,18 @@
 #include "MapTile.h"
 #include <cmath>
 
-
-Helpers::Helpers()
-{
-}
-
-
-Helpers::~Helpers()
-{
-}
-
-float Helpers::Lerp(const float s, const float e, const float p)
+float helpers::lerp(const float s, const float e, const float p)
 {
 	return (s + p * (e - s));
 }
 
 // Euclidean distance.
-float Helpers::DistanceToCoordinate(MapTile* myPos, int x, int y)
+float helpers::distance_to_coordinate(map_tile* my_pos, int x, int y)
 {
-	if (myPos == NULL) return 0;
+	if (my_pos == NULL) return 0;
 
-	const float xDist = (float) myPos->x - x;
-	const float yDist = (float) myPos->y - y;
+	const float xDist = (float) my_pos->x - x;
+	const float yDist = (float) my_pos->y - y;
 
 	float dist = pow(xDist, 2) + pow(yDist, 2);
 	dist = sqrt(dist);

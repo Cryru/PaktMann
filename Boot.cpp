@@ -13,27 +13,28 @@
 #undef main
 
 // Config
-char firstMap[] = "Assets/map.txt";
-int tileSize = 16;
+char first_map[] = "Assets/map.txt";
+int tile_size = 16;
 
 // Assets
-Spritesheet* mapTiles;
-Spritesheet* entitySheet;
+spritesheet* mapTiles;
+spritesheet* entitySheet;
 SDL_Texture* winText;
 SDL_Texture* loseText;
 
-int main(int argc, char* args[]) {
+int submain()
+{
 	printf("Starting SDL...\n");
 	SDL_Init(SDL_INIT_EVERYTHING);
 
 	printf("Creating window and graphics device...\n");
 	SDL_Window* win = SDL_CreateWindow("PaktMann", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 960, 608, SDL_WINDOW_INPUT_FOCUS);
-	if (win == NULL) {
+	if (win == nullptr) {
 		std::cerr << "Couldn't create window, because - " << SDL_GetError();
 		return 1;
 	}
 	SDL_Renderer* renderer = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
-	if (renderer == NULL) {
+	if (renderer == nullptr) {
 		std::cerr << "Couldn't create renderer, because - " << SDL_GetError();
 		return 1;
 	}
@@ -46,52 +47,52 @@ int main(int argc, char* args[]) {
 	}
 
 	printf("Loading assets...\n");
-	mapTiles = new Spritesheet(renderer, "Assets/mapTiles.png", 16);
-	entitySheet = new Spritesheet(renderer, "Assets/entitySheet.png", 16);
-	winText = Spritesheet::LoadTexture(renderer, "Assets/win.png");
-	loseText = Spritesheet::LoadTexture(renderer, "Assets/lose.png");
+	mapTiles = new spritesheet(renderer, "Assets/mapTiles.png", 16);
+	entitySheet = new spritesheet(renderer, "Assets/entitySheet.png", 16);
+	winText = spritesheet::load_texture(renderer, "Assets/win.png");
+	loseText = spritesheet::load_texture(renderer, "Assets/lose.png");
 
 	printf("Loading map...\n");
-	GameMap* map = GameMap::LoadMap(&firstMap[0]);
+	game_map* map = game_map::load_map(&first_map[0]);
 
 	// Set render size based on the map.
-	int sizeX = tileSize * map->GetWidth();
-	int sizeY = tileSize * map->GetHeight();
-	SDL_RenderSetLogicalSize(renderer, sizeX, sizeY);
+	const int size_x = tile_size * map->get_width();
+	const int size_y = tile_size * map->get_height();
+	SDL_RenderSetLogicalSize(renderer, size_x, size_y);
 
 	printf("Starting game loop...\n");
 	SDL_Event ev;
-	bool isRunning = true;
+	bool is_running = true;
 	Uint64 before = SDL_GetPerformanceCounter();
-	while (isRunning) {
+	while (is_running) {
 
 		// Process SDL events.
 		while (SDL_PollEvent(&ev) != 0) {
 
 			// Check if no longer running.
 			if (ev.type == SDL_QUIT) {
-				isRunning = false;
+				is_running = false;
 				break;
 			}
 
 			if (ev.type == SDL_KEYDOWN)
 			{
-				map->Start();
+				map->start();
 			}
 		}
 
-		const Uint8* keys = SDL_GetKeyboardState(NULL);
+		const Uint8* keys = SDL_GetKeyboardState(nullptr);
 
 		// Calculate delta time.
-		Uint64 now = SDL_GetPerformanceCounter();
-		const float deltaTime = (float)((now - before) * 1000 / (float)SDL_GetPerformanceFrequency());
+		const Uint64 now = SDL_GetPerformanceCounter();
+		const float delta_time = static_cast<float>((now - before) * 1000 / static_cast<float>(SDL_GetPerformanceFrequency()));
 		before = now; // words of wisdom.
 
 		// Update input.
 
 		// Update logic and render map.
-		map->Update(deltaTime, keys);
-		map->Draw(renderer, tileSize, mapTiles, entitySheet, winText, loseText);
+		map->update(delta_time, keys);
+		map->draw(renderer, tile_size, mapTiles, entitySheet, winText, loseText);
 
 		// Swap buffers.
 		SDL_RenderPresent(renderer);
@@ -104,11 +105,34 @@ int main(int argc, char* args[]) {
 	SDL_DestroyTexture(loseText);
 
 	delete map;
-	map = NULL;
+	map = nullptr;
 
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(win);
 	SDL_Quit();
 
 	return 0;
+}
+
+/**
+ *
+ * @param argc
+ * @param args
+ * @return
+ */
+int main(int argc, char* args[]) noexcept
+{
+	try
+	{
+		return submain();
+	}
+	catch (std::exception & e)
+	{
+		std::cerr << "Error occured: " << e.what();
+	}
+	catch (...)
+	{
+	}
+
+	return 1;
 }

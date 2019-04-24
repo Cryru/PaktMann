@@ -2,40 +2,43 @@
 #include "Entity.h"
 #include "Direction.h"
 
-class Ghost :
-	public Entity
+class ghost final :
+	public entity
 {
-private:
-	int sprite;
+	int sprite_;
 
 	// Movement Logic
-	float moveTimer = 0;
-	const float moveSpeed = 250;
-	int moveStartX;
-	int moveStartY;
-	float drawX;
-	float drawY;
+	float move_timer_ = 0;
+	const float move_speed_ = 250;
+	int move_start_x_;
+	int move_start_y_;
+	float draw_x_;
+	float draw_y_;
 
 	// AI
-	int lastDetectedX = 0;
-	int lastDetectedY = 0;
-	Direction predictedDirection = None;
-	int AIOffset = 0;
+	int last_detected_x_ = 0;
+	int last_detected_y_ = 0;
+	direction predicted_direction_ = none;
+	int ai_offset_ = 0;
 
 	// Afraid AI and Logic
-	bool afraid = false;
-	float afraidTime = 5000;
-	float afraidTimer = 0;
-	float afraidMoveSpeed = 400;
-	bool goHome = false;
-	float goHomeMoveSpeed = 500;
-	int homeX;
-	int homeY;
+	bool afraid_ = false;
+	float afraid_time_ = 5000;
+	float afraid_timer_ = 0;
+	float afraid_move_speed_ = 400;
+	bool go_home_ = false;
+	float go_home_move_speed_ = 500;
+	int home_x_;
+	int home_y_;
 public:
-	Ghost(GameMap* map, int x, int y, int z, int sprite, int aiOffset);
-	~Ghost() override;
-	void Update(float dt, const Uint8* keys) override;
-	void Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* spriteSheet) override;
-	void EventTriggered(EventType ev) override;
+	ghost(game_map* map, int x, int y, int z, int sprite, int ai_offset);
+	void update(float dt, const Uint8* keys) override;
+	void draw(SDL_Renderer* renderer, int tile_size, spritesheet* sprite_sheet) override;
+	void event_triggered(event_type ev) override;
+	~ghost() override = default;
+	ghost(const ghost&) = delete;
+	ghost& operator=(const ghost&) = delete;
+	ghost(ghost&&) = delete;
+	ghost& operator=(ghost&&) = delete;
 };
 

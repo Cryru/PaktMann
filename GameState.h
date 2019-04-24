@@ -1,9 +1,9 @@
 #pragma once
 
-enum GameState
+enum game_state
 {
-	PreGame,
-	Running,
-	Won,
-	Lost
+	pre_game,
+	running,
+	won,
+	lost
 };

@@ -1,6 +1,7 @@
 #pragma once
-enum EventType
+
+enum event_type
 {
-	PlayerPoweredUp,
-	PlayerIsOnYourTile
+	player_powered_up,
+	player_is_on_your_tile
 };

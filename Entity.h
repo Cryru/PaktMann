@@ -4,23 +4,55 @@
 #include "EntityType.h"
 #include "EventType.h"
 
-class GameMap;
+class game_map;
 
-class Entity
+class entity
 {
 protected:
-	GameMap* map = 0;
-	EntityType type = Undefined;
+	game_map* map_ = nullptr;
+	entity_type type_ = undefined;
 public:
 	int x;
 	int y;
 	int z;
-	bool Dead = false;
-	Entity(GameMap* map, int x, int y, int z);
-	virtual void Update(float dt, const Uint8* keys) = 0;
-	virtual void Draw(SDL_Renderer* renderer, int tileSize, Spritesheet* spriteSheet) = 0;
-	virtual void EventTriggered(EventType ev) = 0;
-	virtual ~Entity() = default;
-	EntityType GetType() const;
+	/**
+	 * Whether the entity is dead. False by default.
+	 */
+	bool dead = false;
+	/**
+	 * Create a new entity
+	 * @param map The map this entity belongs to.
+	 * @param x The x coordinate location of the entity.
+	 * @param y The y coordinate location of the entity.
+	 * @param z The z coordinate location of the entity.
+	 */
+	entity(game_map* map, int x, int y, int z);
+	/**
+	 * Update the internal entity logic.
+	 * @param dt The time passed since the last edit.
+	 * @param keys The pressed keys for this tick.
+	 */
+	virtual void update(float dt, const Uint8* keys) = 0;
+	/**
+	 * Render the entity.
+	 * @param renderer The SDL renderer to use.
+	 * @param tile_size The size of tiles within the map.
+	 * @param sprite_sheet The entity spritesheet to use to render the entity. Each entity uses an index within it that it sees fit.
+	 */
+	virtual void draw(SDL_Renderer* renderer, int tile_size, spritesheet* sprite_sheet) = 0;
+	/**
+	 * Trigger an event for this entity.
+	 * @param ev The event to trigger.
+	 */
+	virtual void event_triggered(event_type ev) = 0;
+	/**
+	 * @returns The type of entity this instance is.
+	 */
+	entity_type get_type() const;
+	virtual ~entity() = default;
+	entity(const entity&) = delete;
+	entity& operator=(const entity&) = delete;
+	entity(entity&&) = delete;
+	entity& operator=(entity&&) = delete;
 };
 
