@@ -9,8 +9,8 @@ Pacman::Pacman(GameMap* map, int x, int y, int z, Uint8 keyUp, Uint8 keyDown, Ui
 	this->keyLeft = keyLeft;
 	this->keyRight = keyRight;
 
-	this->drawX = x;
-	this->drawY = y;
+	this->drawX = (float) x;
+	this->drawY = (float) y;
 
 	this->moveStartX = x;
 	this->moveStartY = y;
@@ -77,12 +77,12 @@ void Pacman::Update(const float dt, const Uint8* keys)
 		// Lerp movement so it looks more natural.
 		moveTimer += dt;
 		float p = moveTimer / moveSpeed;
-		drawX = Helpers::Lerp(moveStartX, x, p);
-		drawY = Helpers::Lerp(moveStartY, y, p);
+		drawX = Helpers::Lerp((float) moveStartX, (float) x, p);
+		drawY = Helpers::Lerp((float) moveStartY, (float) y, p);
 		if (moveTimer >= moveSpeed)
 		{
-			drawX = x;
-			drawY = y;
+			drawX = (float) x;
+			drawY = (float) y;
 			moveTimer = 0;
 		}
 	}
