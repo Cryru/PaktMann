@@ -234,14 +234,21 @@ void game_map::update(const float dt, const Uint8 * keys)
 		if (score_entity->x == player_entity_->x && score_entity->y == player_entity_->y)
 		{
 			score_entity->dead = true;
-			delete score_entity;
 			score_entities_.erase(score_entities_.begin() + i);
 			i--;
 		}
 	}
 
 	// Remove dead entities.
-	entities_.erase(std::remove_if(entities_.begin(), entities_.end(), [](entity * e) { return e->dead; }), entities_.end());
+	entities_.erase(std::remove_if(entities_.begin(), entities_.end(), [](entity * e)
+	{
+		if(e->dead)
+		{
+			delete e;
+			return true;
+		}
+		return false;
+	}), entities_.end());
 
 	// Check if win condition - no score entities, is met.
 	if (score_entities_.empty())
