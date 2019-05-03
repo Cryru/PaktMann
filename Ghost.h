@@ -1,6 +1,7 @@
 #pragma once
 #include "Entity.h"
 #include "Direction.h"
+#include "MapTile.h"
 
 class ghost final :
 	public entity
@@ -30,6 +31,9 @@ class ghost final :
 	float go_home_move_speed_ = 500;
 	int home_x_;
 	int home_y_;
+
+	static map_tile* pathToGoalOld(const int x, const int y, const int goal_x, const int goal_y, game_map* map_, const float move_start_x_, const float move_start_y_, const bool afraid_);
+	static map_tile * pathToGoal(const int x, const int y, const int goal_x, const int goal_y, game_map * map_, const bool afraid_);
 public:
 	ghost(game_map* map, int x, int y, int z, int sprite, int ai_offset);
 	void update(float dt, const Uint8* keys) override;

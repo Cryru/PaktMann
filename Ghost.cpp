@@ -1,6 +1,10 @@
 #include "Ghost.h"
 #include "GameMap.h"
 #include "Helpers.h"
+#include <set>
+#include <queue>
+#include <map>
+#include <iostream>
 
 ghost::ghost(game_map* map, const int x, const int y, const int z, const int sprite, const int ai_offset) : entity(map, x, y, z)
 {
@@ -17,7 +21,159 @@ ghost::ghost(game_map* map, const int x, const int y, const int z, const int spr
 	this->draw_y_ = static_cast<float>(y);
 }
 
-void ghost::update(const float dt, const Uint8* keys)
+// Uses Euclidean distance.
+map_tile* ghost::pathToGoalOld(const int x, const int y, const int goal_x, const int goal_y, game_map* map_, const float move_start_x_, const float move_start_y_, const bool afraid_)
+{
+	// Get neighbor non solid tiles.
+	std::vector<map_tile*> neighbors;
+	map_tile* left = map_->get_tile(x - 1, y);
+	map_tile* right = map_->get_tile(x + 1, y);
+	map_tile* top = map_->get_tile(x, y - 1);
+	map_tile * bottom = map_->get_tile(x, y + 1);
+	if (!left->solid && move_start_x_ != x - 1)
+	{
+		neighbors.push_back(left);
+	}
+	if (!right->solid && move_start_x_ != x + 1)
+	{
+		neighbors.push_back(right);
+	}
+	if (!top->solid && move_start_y_ != y - 1)
+	{
+		neighbors.push_back(top);
+	}
+	if (!bottom->solid && move_start_y_ != y + 1)
+	{
+		neighbors.push_back(bottom);
+	}
+
+	map_tile* goal_tile = nullptr;
+	float best_distance = 0;
+	for (map_tile* neighbor : neighbors)
+	{
+		const float distance = helpers::distance_to_coordinate(neighbor, goal_x, goal_y);
+
+		// If afraid the goal tile is the one furthest from the player - run.
+		if (afraid_)
+		{
+			if (distance > best_distance || best_distance == NULL)
+			{
+				best_distance = distance;
+				goal_tile = neighbor;
+			}
+		}
+		// If not afraid the goal tile is the one closes to the player - get em.
+		else
+		{
+			if (distance < best_distance || best_distance == NULL)
+			{
+				best_distance = distance;
+				goal_tile = neighbor;
+			}
+		}
+	}
+
+	return goal_tile;
+}
+
+class map_tile_wrapper
+{
+public:
+	map_tile* tile = nullptr;
+	int parent = 0;
+
+	map_tile_wrapper()
+	= default;
+
+	map_tile_wrapper(map_tile* me, int parent = 0)
+	{
+		this->tile = me;
+		this->parent = parent;
+	}
+};
+
+// Breadth-first search
+map_tile * ghost::pathToGoal(const int x, const int y, const int goal_x, const int goal_y, game_map * map_, const bool afraid_)
+{
+	std::map<int, map_tile_wrapper> discovered;
+	std::queue<map_tile_wrapper> checkQueue;
+
+	map_tile* startTile = map_->get_tile(x, y);
+	checkQueue.push(map_tile_wrapper(startTile));
+	discovered[helpers::cantor_pairing(startTile->x, startTile->y)] = startTile;
+	map_tile_wrapper lastPath = checkQueue.front();
+
+	while (!checkQueue.empty())
+	{
+		const map_tile_wrapper currentWrapper = checkQueue.front();
+		map_tile* current = currentWrapper.tile;
+		checkQueue.pop();
+		lastPath = map_tile_wrapper(currentWrapper);
+
+		// Check if the goal.
+		if (current->x == goal_x && current->y == goal_y) break;
+
+		// Get the neighbors.
+		if (current->x - 1 > 0 && current->x - 1 < map_->get_width())
+		{
+			map_tile* neighborTile = map_->get_tile(current->x - 1, current->y);
+			int tileHash = helpers::cantor_pairing(neighborTile->x, neighborTile->y);
+			if (!neighborTile->solid && discovered.find(tileHash) == discovered.end())
+			{
+				map_tile_wrapper addedNeighbor = map_tile_wrapper(neighborTile, helpers::cantor_pairing(current->x, current->y));
+				checkQueue.push(addedNeighbor);
+				discovered[tileHash] = addedNeighbor;
+			}
+		}
+		if (current->x + 1 > 0 && current->x + 1 < map_->get_width())
+		{
+			map_tile* neighborTile = map_->get_tile(current->x + 1, current->y);
+			int tileHash = helpers::cantor_pairing(neighborTile->x, neighborTile->y);
+			if (!neighborTile->solid && discovered.find(tileHash) == discovered.end())
+			{
+				map_tile_wrapper addedNeighbor = map_tile_wrapper(neighborTile, helpers::cantor_pairing(current->x, current->y));
+				checkQueue.push(addedNeighbor);
+				discovered[tileHash] = addedNeighbor;
+			}
+		}
+		if (current->y - 1 > 0 && current->y - 1 < map_->get_height())
+		{
+			map_tile* neighborTile = map_->get_tile(current->x, current->y - 1);
+			int tileHash = helpers::cantor_pairing(neighborTile->x, neighborTile->y);
+			if (!neighborTile->solid && discovered.find(tileHash) == discovered.end())
+			{
+				map_tile_wrapper addedNeighbor = map_tile_wrapper(neighborTile, helpers::cantor_pairing(current->x, current->y));
+				checkQueue.push(addedNeighbor);
+				discovered[tileHash] = addedNeighbor;
+			}
+		}
+		if (current->y + 1 > 0 && current->y + 1 < map_->get_height())
+		{
+			map_tile* neighborTile = map_->get_tile(current->x, current->y + 1);
+			int tileHash = helpers::cantor_pairing(neighborTile->x, neighborTile->y);
+			if (!neighborTile->solid && discovered.find(tileHash) == discovered.end())
+			{
+				map_tile_wrapper addedNeighbor = map_tile_wrapper(neighborTile, helpers::cantor_pairing(current->x, current->y));
+				checkQueue.push(addedNeighbor);
+				discovered[tileHash] = addedNeighbor;
+			}
+		}
+	}
+
+	if (lastPath.tile == nullptr) return nullptr;
+
+	// Find the next one in the path before the root
+	while (lastPath.parent != 0)
+	{
+		map_tile_wrapper nextInPath = discovered[lastPath.parent];
+		if (nextInPath.parent == 0) break;
+		lastPath = nextInPath;
+	}
+
+	return lastPath.tile;
+}
+
+void ghost::update(const float dt, const Uint8 * keys)
 {
 	entity* player = map_->get_player();
 
@@ -106,53 +262,16 @@ void ghost::update(const float dt, const Uint8* keys)
 		if (offset_apply > 0) offset_apply -= 1;
 	}
 
-	// Get neighbor non solid tiles.
-	std::vector<map_tile*> neighbors;
-	map_tile* left = map_->get_tile(x - 1, y);
-	map_tile* right = map_->get_tile(x + 1, y);
-	map_tile* top = map_->get_tile(x, y - 1);
-	map_tile * bottom = map_->get_tile(x, y + 1);
-	if (!left->solid && move_start_x_ != x - 1)
-	{
-		neighbors.push_back(left);
-	}
-	if (!right->solid && move_start_x_ != x + 1)
-	{
-		neighbors.push_back(right);
-	}
-	if (!top->solid && move_start_y_ != y - 1)
-	{
-		neighbors.push_back(top);
-	}
-	if (!bottom->solid && move_start_y_ != y + 1)
-	{
-		neighbors.push_back(bottom);
-	}
-
 	map_tile* goal_tile = nullptr;
-	float best_distance = 0;
-	for (map_tile* neighbor : neighbors)
-	{
-		const float distance = helpers::distance_to_coordinate(neighbor, goal_x, goal_y);
 
-		// If afraid the goal tile is the one furthest from the player - run.
-		if (afraid_ && !go_home_)
-		{
-			if (distance > best_distance || best_distance == NULL)
-			{
-				best_distance = distance;
-				goal_tile = neighbor;
-			}
-		}
-		// If not afraid the goal tile is the one closes to the player - get em.
-		else
-		{
-			if (distance < best_distance || best_distance == NULL)
-			{
-				best_distance = distance;
-				goal_tile = neighbor;
-			}
-		}
+	// If afraid use the old AI.
+	if (afraid_ && !go_home_)
+	{
+		goal_tile = pathToGoalOld(x, y, goal_x, goal_y, map_, move_start_x_, move_start_y_, true);
+	}
+	else
+	{
+		goal_tile = pathToGoal(x, y, goal_x, goal_y, map_, afraid_ && !go_home_);
 	}
 
 	if (goal_tile != nullptr)
@@ -212,7 +331,7 @@ void ghost::update(const float dt, const Uint8* keys)
 	}
 }
 
-void ghost::draw(SDL_Renderer* renderer, const int tile_size, spritesheet* sprite_sheet)
+void ghost::draw(SDL_Renderer * renderer, const int tile_size, spritesheet * sprite_sheet)
 {
 	SDL_Rect loc;
 	loc.x = static_cast<int>(this->draw_x_ * tile_size);
@@ -225,6 +344,9 @@ void ghost::draw(SDL_Renderer* renderer, const int tile_size, spritesheet* sprit
 	if (go_home_) sprite_to_draw = 8;
 
 	SDL_RenderCopy(renderer, sprite_sheet->get_texture(), sprite_sheet->get_frame(sprite_to_draw), &loc);
+
+	loc.x = static_cast<int>(9 * tile_size);;
+	loc.y = static_cast<int>(1 * tile_size);;;
 }
 
 void ghost::event_triggered(const event_type ev)

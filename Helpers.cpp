@@ -20,3 +20,9 @@ float helpers::distance_to_coordinate(map_tile* my_pos, int x, int y)
 
 	return dist;
 }
+
+// Hashes ints.
+int helpers::cantor_pairing(const int x, const int y)
+{
+	return static_cast<int>(0.5f * (x + y) * (x + y + 1) + y);
+}
