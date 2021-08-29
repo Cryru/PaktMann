@@ -10,7 +10,7 @@ class entity
 {
 protected:
 	game_map* map_ = nullptr;
-	entity_type type_ = undefined;
+	entity_type type_ = entity_type::undefined;
 public:
 	int x;
 	int y;

@@ -1,6 +1,6 @@
 #pragma once
 
-enum direction
+enum class direction
 {
 	none,
 	left,

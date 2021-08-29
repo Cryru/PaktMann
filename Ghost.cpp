@@ -1,14 +1,15 @@
 #include "Ghost.h"
+
+#include <ios>
+
 #include "GameMap.h"
 #include "Helpers.h"
-#include <set>
 #include <queue>
 #include <map>
-#include <iostream>
 
 ghost::ghost(game_map* map, const int x, const int y, const int z, const int sprite, const int ai_offset) : entity(map, x, y, z)
 {
-	this->type_ = enemy;
+	this->type_ = entity_type::enemy;
 	this->move_start_x_ = x;
 	this->move_start_y_ = y;
 	this->sprite_ = sprite;
@@ -22,14 +23,14 @@ ghost::ghost(game_map* map, const int x, const int y, const int z, const int spr
 }
 
 // Uses Euclidean distance.
-map_tile* ghost::pathToGoalOld(const int x, const int y, const int goal_x, const int goal_y, game_map* map_, const float move_start_x_, const float move_start_y_, const bool afraid_)
+map_tile* ghost::pathAwayFromPlayer(const int player_x, const int player_y) const
 {
 	// Get neighbor non solid tiles.
 	std::vector<map_tile*> neighbors;
 	map_tile* left = map_->get_tile(x - 1, y);
 	map_tile* right = map_->get_tile(x + 1, y);
 	map_tile* top = map_->get_tile(x, y - 1);
-	map_tile * bottom = map_->get_tile(x, y + 1);
+	map_tile* bottom = map_->get_tile(x, y + 1);
 	if (!left->solid && move_start_x_ != x - 1)
 	{
 		neighbors.push_back(left);
@@ -51,25 +52,13 @@ map_tile* ghost::pathToGoalOld(const int x, const int y, const int goal_x, const
 	float best_distance = 0;
 	for (map_tile* neighbor : neighbors)
 	{
-		const float distance = helpers::distance_to_coordinate(neighbor, goal_x, goal_y);
+		const float distance = helpers::distance_to_coordinate(neighbor, player_x, player_y);
 
 		// If afraid the goal tile is the one furthest from the player - run.
-		if (afraid_)
+		if (distance > best_distance || best_distance == NULL)
 		{
-			if (distance > best_distance || best_distance == NULL)
-			{
-				best_distance = distance;
-				goal_tile = neighbor;
-			}
-		}
-		// If not afraid the goal tile is the one closes to the player - get em.
-		else
-		{
-			if (distance < best_distance || best_distance == NULL)
-			{
-				best_distance = distance;
-				goal_tile = neighbor;
-			}
+			best_distance = distance;
+			goal_tile = neighbor;
 		}
 	}
 
@@ -83,7 +72,7 @@ public:
 	int parent = 0;
 
 	map_tile_wrapper()
-	= default;
+		= default;
 
 	map_tile_wrapper(map_tile* me, int parent = 0)
 	{
@@ -93,7 +82,7 @@ public:
 };
 
 // Breadth-first search
-map_tile * ghost::pathToGoal(const int x, const int y, const int goal_x, const int goal_y, game_map * map_, const bool afraid_)
+map_tile* ghost::pathToGoal(const int goal_x, const int goal_y) const
 {
 	std::map<int, map_tile_wrapper> discovered;
 	std::queue<map_tile_wrapper> checkQueue;
@@ -173,105 +162,103 @@ map_tile * ghost::pathToGoal(const int x, const int y, const int goal_x, const i
 	return lastPath.tile;
 }
 
-void ghost::update(const float dt, const Uint8 * keys)
+void ghost::update(const float dt, const Uint8* keys)
 {
+	// Determine where to move to.
 	entity* player = map_->get_player();
-
-	int goal_x;
-	int goal_y;
-
-	// If going home the tile is home, otherwise it's the player.
-	if (go_home_)
-	{
-		goal_x = home_x_;
-		goal_y = home_y_;
-
-		predicted_direction_ = none;
-	}
-	else
-	{
-		goal_x = player->x;
-		goal_y = player->y;
-
-		// Predict the direction of the player.
-		if (last_detected_x_ < player->x)
-		{
-			predicted_direction_ = right;
-			last_detected_x_ = player->x;
-		}
-		if (last_detected_x_ > player->x)
-		{
-			predicted_direction_ = left;
-			last_detected_x_ = player->x;
-		}
-		if (last_detected_y_ < player->y)
-		{
-			predicted_direction_ = down;
-			last_detected_y_ = player->y;
-		}
-		if (last_detected_y_ > player->y)
-		{
-			predicted_direction_ = up;
-			last_detected_y_ = player->y;
-		}
-	}
-
-	// Apply offset.
-	int offset_apply = ai_offset_;
-	while (offset_apply != 0)
-	{
-		bool applied = false;
-
-		// Move in the directed prediction by the offset.
-		switch (predicted_direction_)
-		{
-		case left:
-			if (goal_x - offset_apply > 0 && goal_x - offset_apply < map_->get_width() && !map_->get_tile(goal_x - offset_apply, goal_y)->solid)
-			{
-				applied = true;
-				goal_x -= offset_apply;
-			}
-			break;
-		case right:
-			if (goal_x + offset_apply > 0 && goal_x + offset_apply < map_->get_width() && !map_->get_tile(goal_x + offset_apply, goal_y)->solid)
-			{
-				applied = true;
-				goal_x += offset_apply;
-			}
-			break;
-		case up:
-			if (goal_y - offset_apply > 0 && goal_y - offset_apply < map_->get_height() && !map_->get_tile(goal_x, goal_y - offset_apply)->solid)
-			{
-				applied = true;
-				goal_y -= offset_apply;
-			}
-			break;
-		case down:
-			if (goal_y + offset_apply > 0 && goal_y + offset_apply < map_->get_height() && !map_->get_tile(goal_x, goal_y + offset_apply)->solid)
-			{
-				applied = true;
-				goal_y += offset_apply;
-			}
-			break;
-		default:;
-		}
-
-		if (applied) break;
-
-		if (offset_apply < 0) offset_apply += 1;
-		if (offset_apply > 0) offset_apply -= 1;
-	}
-
-	map_tile* goal_tile = nullptr;
-
-	// If afraid use the old AI.
+	map_tile* goal_tile;
 	if (afraid_ && !go_home_)
 	{
-		goal_tile = pathToGoalOld(x, y, goal_x, goal_y, map_, move_start_x_, move_start_y_, true);
+		goal_tile = pathAwayFromPlayer(player->x, player->y);
 	}
 	else
 	{
-		goal_tile = pathToGoal(x, y, goal_x, goal_y, map_, afraid_ && !go_home_);
+		int goal_x;
+		int goal_y;
+
+		// If going home the tile is home, otherwise it's the player.
+		if (go_home_)
+		{
+			goal_x = home_x_;
+			goal_y = home_y_;
+
+			predicted_direction_ = direction::none;
+		}
+		else
+		{
+			goal_x = player->x;
+			goal_y = player->y;
+
+			// Predict the direction of the player.
+			if (last_detected_x_ < player->x)
+			{
+				predicted_direction_ = direction::right;
+				last_detected_x_ = player->x;
+			}
+			if (last_detected_x_ > player->x)
+			{
+				predicted_direction_ = direction::left;
+				last_detected_x_ = player->x;
+			}
+			if (last_detected_y_ < player->y)
+			{
+				predicted_direction_ = direction::down;
+				last_detected_y_ = player->y;
+			}
+			if (last_detected_y_ > player->y)
+			{
+				predicted_direction_ = direction::up;
+				last_detected_y_ = player->y;
+			}
+		}
+
+		// Apply offset.
+		int offset_apply = ai_offset_;
+		while (offset_apply != 0)
+		{
+			bool applied = false;
+
+			// Move in the directed prediction by the offset.
+			switch (predicted_direction_)
+			{
+			case direction::left:
+				if (goal_x - offset_apply > 0 && goal_x - offset_apply < map_->get_width() && !map_->get_tile(goal_x - offset_apply, goal_y)->solid)
+				{
+					applied = true;
+					goal_x -= offset_apply;
+				}
+				break;
+			case direction::right:
+				if (goal_x + offset_apply > 0 && goal_x + offset_apply < map_->get_width() && !map_->get_tile(goal_x + offset_apply, goal_y)->solid)
+				{
+					applied = true;
+					goal_x += offset_apply;
+				}
+				break;
+			case direction::up:
+				if (goal_y - offset_apply > 0 && goal_y - offset_apply < map_->get_height() && !map_->get_tile(goal_x, goal_y - offset_apply)->solid)
+				{
+					applied = true;
+					goal_y -= offset_apply;
+				}
+				break;
+			case direction::down:
+				if (goal_y + offset_apply > 0 && goal_y + offset_apply < map_->get_height() && !map_->get_tile(goal_x, goal_y + offset_apply)->solid)
+				{
+					applied = true;
+					goal_y += offset_apply;
+				}
+				break;
+			default:;
+			}
+
+			if (applied) break;
+
+			if (offset_apply < 0) offset_apply += 1;
+			if (offset_apply > 0) offset_apply -= 1;
+		}
+
+		goal_tile = pathToGoal(goal_x, goal_y);
 	}
 
 	if (goal_tile != nullptr)
@@ -331,7 +318,7 @@ void ghost::update(const float dt, const Uint8 * keys)
 	}
 }
 
-void ghost::draw(SDL_Renderer * renderer, const int tile_size, spritesheet * sprite_sheet)
+void ghost::draw(SDL_Renderer* renderer, const int tile_size, spritesheet* sprite_sheet)
 {
 	SDL_Rect loc;
 	loc.x = static_cast<int>(this->draw_x_ * tile_size);
@@ -351,15 +338,15 @@ void ghost::draw(SDL_Renderer * renderer, const int tile_size, spritesheet * spr
 
 void ghost::event_triggered(const event_type ev)
 {
-	if (ev == player_powered_up)
+	if (ev == event_type::player_powered_up)
 	{
 		afraid_ = true;
 		afraid_timer_ = 0;
 	}
-	else if (ev == player_is_on_your_tile)
+	else if (ev == event_type::player_is_on_your_tile)
 	{
 		// If the player is on my tile, and I'm not afraid of him (lol) he's dead.
-		// Otherwise, i've been defeated and my go home to regenerate.
+		// Otherwise, i've been defeated and must go home to regenerate.
 		if (!afraid_) map_->get_player()->dead = true;
 		else go_home_ = true;
 	}

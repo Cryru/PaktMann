@@ -19,7 +19,7 @@ class ghost final :
 	// AI
 	int last_detected_x_ = 0;
 	int last_detected_y_ = 0;
-	direction predicted_direction_ = none;
+	direction predicted_direction_ = direction::none;
 	int ai_offset_ = 0;
 
 	// Afraid AI and Logic
@@ -31,9 +31,9 @@ class ghost final :
 	float go_home_move_speed_ = 500;
 	int home_x_;
 	int home_y_;
-
-	static map_tile* pathToGoalOld(const int x, const int y, const int goal_x, const int goal_y, game_map* map_, const float move_start_x_, const float move_start_y_, const bool afraid_);
-	static map_tile * pathToGoal(const int x, const int y, const int goal_x, const int goal_y, game_map * map_, const bool afraid_);
+	
+	map_tile* pathAwayFromPlayer(int player_x, int player_y) const;
+	map_tile * pathToGoal(int goal_x, int goal_y) const;
 public:
 	ghost(game_map* map, int x, int y, int z, int sprite, int ai_offset);
 	void update(float dt, const Uint8* keys) override;

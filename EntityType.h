@@ -1,6 +1,6 @@
 #pragma once
 
-enum entity_type
+enum class entity_type
 {
 	undefined,
 	player,

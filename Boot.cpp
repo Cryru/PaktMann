@@ -114,12 +114,6 @@ int submain()
 	return 0;
 }
 
-/**
- *
- * @param argc
- * @param args
- * @return
- */
 int main(int argc, char* args[]) noexcept
 {
 	try

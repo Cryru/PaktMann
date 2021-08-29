@@ -15,7 +15,7 @@ pacman::pacman(game_map* map, const int x, const int y, const int z, const Uint8
 	this->move_start_x_ = x;
 	this->move_start_y_ = y;
 
-	this->type_ = player;
+	this->type_ = entity_type::player;
 }
 
 void pacman::draw(SDL_Renderer* renderer, const int tile_size, spritesheet* sprite_sheet)
@@ -31,13 +31,13 @@ void pacman::draw(SDL_Renderer* renderer, const int tile_size, spritesheet* spri
 
 	switch (direction_)
 	{
-	case right:
+	case direction::right:
 		flip = SDL_FLIP_HORIZONTAL;
 		break;
-	case up:
+	case direction::up:
 		angle = 90;
 		break;
-	case down:
+	case direction::down:
 		angle = -90;
 		flip = SDL_FLIP_VERTICAL;
 		break;
@@ -51,21 +51,21 @@ void pacman::draw(SDL_Renderer* renderer, const int tile_size, spritesheet* spri
 void pacman::update(const float dt, const Uint8* keys)
 {
 	// Check inputs and set velocity.
-	if (keys[key_up_] && !map_->get_tile(x, y - 1)->solid)
+	if (keys[key_up_])
 	{
-		direction_ = up;
+		direction_input_ = direction::up;
 	}
-	if (keys[key_down_] && !map_->get_tile(x, y + 1)->solid)
+	if (keys[key_down_])
 	{
-		direction_ = down;
+		direction_input_ = direction::down;
 	}
-	if (keys[key_left_] && !map_->get_tile(x - 1, y)->solid)
+	if (keys[key_left_])
 	{
-		direction_ = left;
+		direction_input_ = direction::left;
 	}
-	if (keys[key_right_] && !map_->get_tile(x + 1, y)->solid)
+	if (keys[key_right_])
 	{
-		direction_ = right;
+		direction_input_ = direction::right;
 	}
 
 	// Check if moving.
@@ -86,18 +86,35 @@ void pacman::update(const float dt, const Uint8* keys)
 	// Check if should move.
 	if (move_timer_ == 0)
 	{
+		switch (direction_input_)
+		{
+		case direction::left:
+			if(!map_->get_tile(x - 1, y)->solid) direction_ = direction_input_;
+			break;
+		case direction::right:
+			if(!map_->get_tile(x + 1, y)->solid) direction_ = direction_input_;
+			break;
+		case direction::up:
+			if(!map_->get_tile(x, y - 1)->solid) direction_ = direction_input_;
+			break;
+		case direction::down:
+			if(!map_->get_tile(x, y + 1)->solid) direction_ = direction_input_;
+			break;
+		default:;
+		}
+
 		switch (direction_)
 		{
-		case left:
+		case direction::left:
 			move(-1, 0, dt);
 			break;
-		case right:
+		case direction::right:
 			move(1, 0, dt);
 			break;
-		case up:
+		case direction::up:
 			move(0, -1, dt);
 			break;
-		case down:
+		case direction::down:
 			move(0, 1, dt);
 			break;
 		default:;

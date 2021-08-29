@@ -3,7 +3,7 @@
 
 power_fruit::power_fruit(game_map* map, const int x, const int y, const int z) : entity(map, x, y, z)
 {
-	this->type_ = score;
+	this->type_ = entity_type::score;
 }
 
 void power_fruit::update(float dt, const Uint8* keys)
@@ -30,6 +30,6 @@ power_fruit::~power_fruit()
 	std::vector<entity*> entities = map_->get_enemies();
 	for (entity* entity : entities)
 	{
-		entity->event_triggered(player_powered_up);
+		entity->event_triggered(event_type::player_powered_up);
 	}
 }

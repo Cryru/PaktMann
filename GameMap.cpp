@@ -39,17 +39,17 @@ ghost* create_ghost_h(game_map* map, const int x, const int y)
 	return new ghost(map, x, y, 4, 7, -5);
 }
 
-score_fruit* create_score_fruit(game_map * map, const int x, const int y)
+score_fruit* create_score_fruit(game_map* map, const int x, const int y)
 {
 	return new score_fruit(map, x, y, 1);
 }
 
-power_fruit* create_power_fruit(game_map * map, const int x, const int y)
+power_fruit* create_power_fruit(game_map* map, const int x, const int y)
 {
 	return new power_fruit(map, x, y, 1);
 }
 
-typedef entity* (*entity_creator)(game_map * map, int, int);
+typedef entity* (*entity_creator)(game_map* map, int, int);
 
 std::map<char, entity_creator> entity_map = {
 	{ 'p', reinterpret_cast<entity_creator>(create_pacman) },
@@ -114,13 +114,13 @@ game_map* game_map::load_map(const char* map_name) {
 				// Add to correct entity sublist.
 				switch (new_entity->get_type())
 				{
-				case player:
+				case entity_type::player:
 					map->player_entity_ = new_entity;
 					break;
-				case enemy:
+				case entity_type::enemy:
 					map->enemy_entities_.push_back(new_entity);
 					break;
-				case score:
+				case entity_type::score:
 					map->score_entities_.push_back(new_entity);
 					break;
 				default:
@@ -130,7 +130,7 @@ game_map* game_map::load_map(const char* map_name) {
 		}
 	}
 
-	std::sort(map->entities_.begin(), map->entities_.end(), [](entity * x, entity * y) { return x->z < y->z; });
+	std::sort(map->entities_.begin(), map->entities_.end(), [](entity* x, entity* y) { return x->z < y->z; });
 
 	return map;
 }
@@ -164,7 +164,7 @@ map_tile* game_map::get_tile(const int x, const int y)
 	return map_[x][y];
 }
 
-void game_map::set_tile(const int x, const int y, map_tile * tile_data) {
+void game_map::set_tile(const int x, const int y, map_tile* tile_data) {
 	map_[x][y] = (tile_data);
 }
 
@@ -217,7 +217,7 @@ game_map::~game_map()
 	entities_.clear();
 }
 
-void game_map::update(const float dt, const Uint8 * keys)
+void game_map::update(const float dt, const Uint8* keys)
 {
 	// Check if running.
 	if (state_ != running) return;
@@ -240,15 +240,15 @@ void game_map::update(const float dt, const Uint8 * keys)
 	}
 
 	// Remove dead entities.
-	entities_.erase(std::remove_if(entities_.begin(), entities_.end(), [](entity * e)
-	{
-		if(e->dead)
+	entities_.erase(std::remove_if(entities_.begin(), entities_.end(), [](entity* e)
 		{
-			delete e;
-			return true;
-		}
-		return false;
-	}), entities_.end());
+			if (e->dead)
+			{
+				delete e;
+				return true;
+			}
+			return false;
+		}), entities_.end());
 
 	// Check if win condition - no score entities, is met.
 	if (score_entities_.empty())
@@ -261,7 +261,7 @@ void game_map::update(const float dt, const Uint8 * keys)
 	{
 		if (enemy_entity->x == player_entity_->x && enemy_entity->y == player_entity_->y)
 		{
-			enemy_entity->event_triggered(player_is_on_your_tile);
+			enemy_entity->event_triggered(event_type::player_is_on_your_tile);
 		}
 	}
 
@@ -272,7 +272,7 @@ void game_map::update(const float dt, const Uint8 * keys)
 	}
 }
 
-void game_map::draw(SDL_Renderer * renderer, const int tile_size, spritesheet * map_spritesheet, spritesheet * entity_spritesheet, SDL_Texture * win_image, SDL_Texture * lose_image)
+void game_map::draw(SDL_Renderer* renderer, const int tile_size, spritesheet* map_spritesheet, spritesheet* entity_spritesheet, SDL_Texture* win_image, SDL_Texture* lose_image)
 {
 	for (int x = 0; x < width_; x++)
 	{

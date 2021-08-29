@@ -19,7 +19,8 @@ class pacman final :
 	// Movement Logic
 	float move_timer_ = 0;
 	const float move_speed_ = 125;
-	direction direction_ = none;
+	direction direction_ = direction::none;
+	direction direction_input_ = direction::none;
 	int move_start_x_;
 	int move_start_y_;
 	float draw_x_;

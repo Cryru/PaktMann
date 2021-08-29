@@ -3,7 +3,7 @@
 
 score_fruit::score_fruit(game_map* map, int x, int y, int z) : entity(map, x, y, z)
 {
-	this->type_ = score;
+	this->type_ = entity_type::score;
 }
 
 void score_fruit::update(float dt, const Uint8* keys)
